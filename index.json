@@ -16,6 +16,22 @@
       "downloadUrl": "https://github.com/Alnitak44/picora-plugins/releases/download/telegraph-image-v1.1.1/telegraph-image-1.1.1.picora-plugin.zip",
       "sha256": "0622f8fcb89e9952cf24629bbac33d082ee31e1c4785f595ad08c3a62eeb09fa",
       "size": 3813
+    },
+    {
+      "id": "com.imgloc.picora",
+      "name": "ImgLoc 图床",
+      "description": "ImgLoc 图片上传，自动获取并刷新临时上传凭证。",
+      "author": "Na",
+      "repository": "https://github.com/Alnitak44/picora-plugins/tree/main/plugins/imgloc",
+      "version": "1.1.0",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.1",
+      "mark": "IL",
+      "example": false,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugins/releases/download/imgloc-v1.1.0/imgloc-1.1.0.picora-plugin.zip",
+      "sha256": "2a165d48d5c5d494f784a0e04c8b6081a7ef54f565c1ab3046b83b544bb1303a",
+      "size": 3617
     }
   ]
 }
