@@ -1,0 +1,11 @@
+{
+  "id": "io.github.alnitak44.imgloc",
+  "releaseRepository": "Alnitak44/picora-plugin-imgloc",
+  "minAppVersion": "1.0.1",
+  "approvedPermissions": {
+    "network": ["imgloc.com"],
+    "readSelectedFile": true,
+    "allowInsecureHttp": false,
+    "deleteUploadedFile": false
+  }
+}
