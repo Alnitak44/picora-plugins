@@ -184,9 +184,11 @@ class GitHub:
 
 def build(registrations, github):
     entries = []
+    if not registrations.is_dir():
+        fail("registrations directory is missing")
     paths = sorted(registrations.glob("*.json"))
-    if not paths or len(paths) > 500:
-        fail("catalog must contain 1 to 500 registrations")
+    if len(paths) > 500:
+        fail("catalog must contain at most 500 registrations")
     for path in paths:
         registration = load_registration(path)
         candidates = []

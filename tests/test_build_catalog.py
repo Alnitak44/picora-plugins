@@ -31,7 +31,7 @@ REGISTRATION = {
 }
 
 
-def package(version="1.0.0", network=None):
+def package(version="1.0.0", network=None, metadata_changes=None):
     metadata = {
         "packageVersion": 1,
         "runtime": "http-v2",
@@ -43,6 +43,7 @@ def package(version="1.0.0", network=None):
         "repository": "https://github.com/example/picora-plugin-demo",
         "version": version,
         "mark": "DE",
+        **(metadata_changes or {}),
     }
     program = {
         "schemaVersion": 2,
@@ -83,6 +84,34 @@ class FakeGitHub:
 
 
 class CatalogBuilderTests(unittest.TestCase):
+    def test_last_plugin_can_exit_without_fetching_its_releases(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            registrations = Path(temp)
+            path = registrations / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            previous = build(registrations, FakeGitHub(["1.0.0"]))
+            path.unlink()
+            catalog = build(registrations, object())
+        self.assertEqual(catalog, {"schemaVersion": 1, "plugins": []})
+        guard_existing_versions(previous, catalog)
+        readme = update_readme(
+            "before\n<!-- catalog:start -->\nDemo Image Host\n<!-- catalog:end -->\nafter",
+            catalog,
+        )
+        self.assertNotIn("Demo Image Host", readme)
+        self.assertIn("| 插件 | 版本 | 说明 |", readme)
+
+    def test_missing_registration_directory_cannot_clear_catalog(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            with self.assertRaisesRegex(ValueError, "directory is missing"):
+                build(Path(temp) / "missing", object())
+
+    def test_package_cannot_self_assign_example_badge(self):
+        data = package(metadata_changes={"example": True})
+        self.assertFalse(parse_package(data, REGISTRATION)["example"])
+        # Only the reviewed registry registration designates development samples.
+        self.assertTrue(parse_package(data, {**REGISTRATION, "example": True})["example"])
+
     def test_release_produces_download_url_size_and_digest(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
             path = Path(temp) / f"{PLUGIN_ID}.json"

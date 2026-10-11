@@ -15,7 +15,7 @@
 
 ## 投稿与更新
 
-详细步骤见 [贡献指南](CONTRIBUTING.md)。
+详细步骤见 [贡献指南](CONTRIBUTING.md)；开发者可通过[退出收录](CONTRIBUTING.md#退出收录)申请移除自己的插件。
 
 1. 按 [Picora 插件协议](https://github.com/Alnitak44/Picora/blob/main/docs/PLUGINS.md)制作并测试 ZIP，在自己的公开 GitHub 仓库创建 Release，上传 ZIP 附件。
 2. Fork 本仓库，在 `registrations/<插件 ID>.json` 新增一份登记文件，然后提交 PR。[通用登记示例](examples/io.github.example.picora.demo.json)可作为起点。
