@@ -26,3 +26,17 @@
 维护者核实作者或获授权维护者的身份后处理。登记移除并成功生成新目录后，插件停止在线展示、下载和更新；客户端成功刷新目录后生效，缓存或镜像可能延迟。请勿直接修改自动生成的 `index.json` 或 README 插件列表。
 
 退出收录不会卸载用户已安装的插件，也不会删除配置、上传记录或图床文件。作者自行管理源码仓库和 Release，已获取 ZIP 的用户仍可本地安装。需要恢复收录时，重新提交登记文件并接受审核。
+
+## 常见问题
+
+| 检查项 | 正确写法 |
+| --- | --- |
+| Release 附件名 | `imgloc-1.1.0.picora-plugin.zip`；必须以 `.picora-plugin.zip` 结尾，不能写成 `-picora-plugin.zip`，且不能是草稿、预发布或自动生成的 Source code ZIP。 |
+| 登记文件名 | `registrations/io.github.alnitak44.imgloc.json`；包含完整 ID 和 `.json` 后缀，与 ZIP 内的 `id` 一致。 |
+| 网络权限 | `"network": ["imgloc.com"]`；填写主机名，不带 `https://` 或路径，与入口程序权限一致。 |
+| 源码地址 | `releaseRepository` 使用 `用户名/仓库名`，ZIP 内 `repository` 使用同一仓库的根 URL。 |
+| 插件包结构 | `plugin.json`、入口 JSON、`readme.md` 和 `assets/` 直接位于 ZIP 根目录，不额外套目录。 |
+
+失败时在 **Actions → Build plugin catalog → 失败的运行 → build** 查看失败步骤，查找 `catalog build failed: …`。修正作者 Release 后重新运行工作流；修正登记文件则提交新修改触发校验。不要手动修改生成目录。
+
+更多报错、版本更新与缓存问题见[完整排查说明](https://github.com/Alnitak44/Picora/blob/main/docs/插件提交流程.md#常见问题与排查)。
