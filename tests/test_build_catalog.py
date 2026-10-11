@@ -15,10 +15,10 @@ from scripts.build_catalog import (
 )
 
 
-PLUGIN_ID = "io.github.ruzmarin.picora.imgbb"
-REPOSITORY = "ruzmariN/picora-plugin-imgbb"
+PLUGIN_ID = "io.github.example.picora.demo"
+REPOSITORY = "example/picora-plugin-demo"
 PERMISSIONS = {
-    "network": ["api.imgbb.com"],
+    "network": ["api.example.com"],
     "readSelectedFile": True,
     "allowInsecureHttp": False,
     "deleteUploadedFile": False,
@@ -37,18 +37,18 @@ def package(version="1.0.0", network=None):
         "runtime": "http-v2",
         "entry": "uploader.json",
         "id": PLUGIN_ID,
-        "name": "ImgBB 图床",
+        "name": "Demo Image Host",
         "description": "Upload images",
-        "author": "迷迭香",
-        "repository": "https://github.com/ruzmariN/picora-plugin-imgbb",
+        "author": "Example Author",
+        "repository": "https://github.com/example/picora-plugin-demo",
         "version": version,
-        "mark": "IB",
+        "mark": "DE",
     }
     program = {
         "schemaVersion": 2,
         "permissions": {
             **PERMISSIONS,
-            "network": network or ["api.imgbb.com"],
+            "network": network or ["api.example.com"],
         },
         "config": [],
         "upload": {},
@@ -57,7 +57,7 @@ def package(version="1.0.0", network=None):
     with zipfile.ZipFile(output, "w") as archive:
         archive.writestr("plugin.json", json.dumps(metadata))
         archive.writestr("uploader.json", json.dumps(program))
-        archive.writestr("readme.md", "# ImgBB")
+        archive.writestr("readme.md", "# Demo")
     return output.getvalue()
 
 
@@ -66,12 +66,12 @@ class FakeGitHub:
         self.assets = {}
         self.release_list = []
         for version in versions:
-            url = f"https://github.com/{REPOSITORY}/releases/download/v{version}/imgbb-{version}.picora-plugin.zip"
+            url = f"https://github.com/{REPOSITORY}/releases/download/v{version}/demo-{version}.picora-plugin.zip"
             self.assets[url] = package(version)
             self.release_list.append({
                 "draft": False,
                 "prerelease": False,
-                "assets": [{"name": f"imgbb-{version}.picora-plugin.zip", "browser_download_url": url}],
+                "assets": [{"name": f"demo-{version}.picora-plugin.zip", "browser_download_url": url}],
             })
 
     def releases(self, repository):
@@ -95,7 +95,7 @@ class CatalogBuilderTests(unittest.TestCase):
         self.assertEqual(len(entry["sha256"]), 64)
         self.assertIn("/releases/download/v1.1.0/", entry["downloadUrl"])
         readme = update_readme("before\n<!-- catalog:start -->\nold\n<!-- catalog:end -->\nafter", catalog)
-        self.assertIn("[ImgBB 图床](https://github.com/ruzmariN/picora-plugin-imgbb)", readme)
+        self.assertIn("[Demo Image Host](https://github.com/example/picora-plugin-demo)", readme)
         self.assertNotIn("下载](https://", readme)
 
     def test_permission_change_is_not_auto_published(self):
