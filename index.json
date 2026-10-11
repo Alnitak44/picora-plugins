@@ -32,6 +32,22 @@
       "sha256": "0622f8fcb89e9952cf24629bbac33d082ee31e1c4785f595ad08c3a62eeb09fa",
       "size": 3813,
       "downloadUrl": "https://github.com/Alnitak44/picora-plugins/releases/download/telegraph-image-v1.1.1/telegraph-image-1.1.1.picora-plugin.zip"
+    },
+    {
+      "id": "io.github.ruzmarin.picora.imgbb",
+      "name": "ImgBB 图床",
+      "description": "使用 ImgBB API Key 上传图片并获取直链。",
+      "author": "迷迭香",
+      "repository": "https://github.com/ruzmariN/picora-plugin-imgbb",
+      "version": "1.0.0",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.1",
+      "mark": "IB",
+      "example": false,
+      "sha256": "ed0dfbd829d1beae6b35d4531e6485290b0d0eea1771ca79b2e930ce55a61b65",
+      "size": 3158,
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-imgbb/releases/download/v1.0.0/imgbb-1.0.0.picora-plugin.zip"
     }
   ]
 }
