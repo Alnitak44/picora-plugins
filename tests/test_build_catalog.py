@@ -84,6 +84,18 @@ class FakeGitHub:
 
 
 class CatalogBuilderTests(unittest.TestCase):
+    def test_removed_imgloc_cannot_use_legacy_registration(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / "com.imgloc.picora.json"
+            path.write_text(json.dumps({
+                **REGISTRATION,
+                "id": "com.imgloc.picora",
+                "releaseRepository": "Alnitak44/picora-plugins",
+                "legacy": True,
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "legacy exception"):
+                load_registration(path)
+
     def test_last_plugin_can_exit_without_fetching_its_releases(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
             registrations = Path(temp)

@@ -19,7 +19,7 @@ REPO_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_.-]+$")
 VERSION_RE = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$")
 MAX_ZIP = 10 * 1024 * 1024
 MAX_UNPACKED = 20 * 1024 * 1024
-LEGACY_IDS = {"com.imgloc.picora", "dev.picora.telegraph-image"}
+LEGACY_IDS = {"dev.picora.telegraph-image"}
 
 
 def fail(message):
