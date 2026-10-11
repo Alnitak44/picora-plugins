@@ -7,7 +7,7 @@
 | 插件 | 版本 | 说明 |
 | --- | --- | --- |
 | [Telegraph-Image](https://github.com/Alnitak44/Picora/tree/main/plugins/telegraph-image) | 1.1.1 | 开发示例，连接自建 Telegraph-Image 图床 |
-| [ImgLoc](plugins/imgloc) | 1.1.0 | 自动获取临时凭证，需 http-v2 运行时 |
+| [ImgLoc](plugins/imgloc) | 1.1.0 | 自动获取临时凭证，http-v2 |
 
 [Telegraph-Image 下载](https://github.com/Alnitak44/picora-plugins/releases/tag/telegraph-image-v1.1.1) · [ImgLoc 下载](https://github.com/Alnitak44/picora-plugins/releases/tag/imgloc-v1.1.0)
 
