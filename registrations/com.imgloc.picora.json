@@ -1,0 +1,13 @@
+{
+  "id": "com.imgloc.picora",
+  "releaseRepository": "Alnitak44/picora-plugins",
+  "assetPrefix": "imgloc-",
+  "minAppVersion": "1.0.1",
+  "legacy": true,
+  "approvedPermissions": {
+    "network": ["imgloc.com"],
+    "readSelectedFile": true,
+    "allowInsecureHttp": false,
+    "deleteUploadedFile": false
+  }
+}

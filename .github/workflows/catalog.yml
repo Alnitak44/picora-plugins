@@ -1,0 +1,55 @@
+name: Build plugin catalog
+
+on:
+  pull_request:
+    paths:
+      - 'registrations/**'
+      - 'scripts/**'
+      - 'README.md'
+      - '.github/workflows/catalog.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'registrations/**'
+      - 'scripts/**'
+      - '.github/workflows/catalog.yml'
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: plugin-catalog
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test catalog builder
+        run: python -m unittest discover -s tests
+      - name: Validate proposed catalog
+        if: github.event_name == 'pull_request'
+        run: python scripts/build_catalog.py --check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Generate catalog
+        if: github.event_name != 'pull_request'
+        run: python scripts/build_catalog.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Commit generated catalog
+        if: github.event_name != 'pull_request'
+        run: |
+          git add index.json README.md
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: refresh plugin catalog'
+          git push
