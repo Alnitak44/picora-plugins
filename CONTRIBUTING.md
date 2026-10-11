@@ -4,7 +4,7 @@
 
 1. 按 [插件协议](https://github.com/Alnitak44/Picora/blob/main/docs/PLUGINS.md)制作插件，在 Picora 中使用本地 ZIP 测试。
 2. 将源码与说明放在自己控制的公开 GitHub 仓库，在该仓库的 Release 中上传 `.picora-plugin.zip` 附件。ZIP 根目录需包含 `plugin.json`、入口 JSON、`readme.md` 和所引用的资源。
-3. Fork 本仓库，复制 [登记示例](examples/io.github.ruzmarin.picora.imgbb.json)到 `registrations/<插件 ID>.json`，修改以下字段后提交 PR：
+3. Fork 本仓库，复制 [登记示例](examples/io.github.example.picora.demo.json)到 `registrations/<插件 ID>.json`，修改以下字段后提交 PR：
    - `id`：与 ZIP 中的 `plugin.json` 完全相同。新插件使用 `io.github.<你的 GitHub 用户名小写>.<插件名>`。
    - `releaseRepository`：`用户名/仓库名`。ZIP 元信息中的 `repository` 应指向这个仓库。
    - `minAppVersion`：插件所需的 Picora 最低版本；`http-v2` 至少为 `1.0.1`。

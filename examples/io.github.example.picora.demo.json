@@ -1,9 +1,9 @@
 {
-  "id": "io.github.ruzmarin.picora.imgbb",
-  "releaseRepository": "ruzmariN/picora-plugin-imgbb",
+  "id": "io.github.example.picora.demo",
+  "releaseRepository": "example/picora-plugin-demo",
   "minAppVersion": "1.0.1",
   "approvedPermissions": {
-    "network": ["api.imgbb.com"],
+    "network": ["api.example.com"],
     "readSelectedFile": true,
     "allowInsecureHttp": false,
     "deleteUploadedFile": false
