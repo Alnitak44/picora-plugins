@@ -9,7 +9,6 @@
 | --- | --- | --- |
 | [Telegraph-Image](https://github.com/Alnitak44/Picora/tree/main/plugins/telegraph-image) | 1.1.1 | 连接 cf-pages/Telegraph-Image 自建图床 |
 | [ImgBB 图床](https://github.com/ruzmariN/picora-plugin-imgbb) | 1.0.0 | 使用 ImgBB API Key 上传图片并获取直链。 |
-| [聚合图床 (Superbed)](https://github.com/ruzmariN/picora-plugin-superbed) | 1.0.0 | 使用聚合图床 API Key 上传图片并获取直链。 |
 <!-- catalog:end -->
 
 ## 投稿与更新
