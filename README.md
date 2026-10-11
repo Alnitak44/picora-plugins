@@ -7,7 +7,6 @@
 <!-- catalog:start -->
 | 插件 | 版本 | 说明 |
 | --- | --- | --- |
-| [ImgLoc 图床](https://github.com/Alnitak44/picora-plugins/tree/main/plugins/imgloc) | 1.1.0 | ImgLoc 图片上传，自动获取并刷新临时上传凭证。 |
 | [Telegraph-Image](https://github.com/Alnitak44/Picora/tree/main/plugins/telegraph-image) | 1.1.1 | 连接 cf-pages/Telegraph-Image 自建图床 |
 | [ImgBB 图床](https://github.com/ruzmariN/picora-plugin-imgbb) | 1.0.0 | 使用 ImgBB API Key 上传图片并获取直链。 |
 | [聚合图床 (Superbed)](https://github.com/ruzmariN/picora-plugin-superbed) | 1.0.0 | 使用聚合图床 API Key 上传图片并获取直链。 |
