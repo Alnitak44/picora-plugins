@@ -1,20 +1,25 @@
 # Picora 模块仓库
 
-[Picora](https://github.com/Alnitak44/Picora) 的在线插件目录。客户端读取 [index.json](index.json)，下载 GitHub Releases 中的 ZIP，核对 ID、版本、大小和 SHA-256。
+[Picora](https://github.com/Alnitak44/Picora) 的在线插件目录。客户端读取自动生成的 [index.json](index.json)，从插件作者的 GitHub Release 下载 ZIP，并校验插件身份、版本、大小和 SHA-256。
 
-## 插件
+## 已收录插件
 
+<!-- catalog:start -->
 | 插件 | 版本 | 说明 |
 | --- | --- | --- |
-| [Telegraph-Image](https://github.com/Alnitak44/Picora/tree/main/plugins/telegraph-image) | 1.1.1 | 开发示例，连接自建 Telegraph-Image 图床 |
-| [ImgLoc](plugins/imgloc) | 1.1.0 | 自动获取临时凭证，http-v2 |
+| [ImgLoc 图床](https://github.com/Alnitak44/picora-plugins/tree/main/plugins/imgloc) | 1.1.0 | ImgLoc 图片上传，自动获取并刷新临时上传凭证。 |
+| [Telegraph-Image](https://github.com/Alnitak44/Picora/tree/main/plugins/telegraph-image) | 1.1.1 | 连接 cf-pages/Telegraph-Image 自建图床 |
+<!-- catalog:end -->
 
-[Telegraph-Image 下载](https://github.com/Alnitak44/picora-plugins/releases/tag/telegraph-image-v1.1.1) · [ImgLoc 下载](https://github.com/Alnitak44/picora-plugins/releases/tag/imgloc-v1.1.0)
+在 Picora 的模块仓库中可以直接安装；表格中的插件名称链接到作者提供的源码或说明。这里不再单独维护下载链接。
 
-## 收录与更新
+## 投稿与更新
 
-按 [插件协议](https://github.com/Alnitak44/Picora/blob/main/docs/PLUGINS.md) 制作 ZIP，在作者仓库发布 GitHub Release，再提交 index.json 条目的 PR。
+详细步骤见 [贡献指南](CONTRIBUTING.md)。
 
-保持 ID 稳定，使用新的 SemVer 版本、下载地址和摘要，不覆盖已发布版本的附件。合并前审核请求目标、凭证使用与删除语义。
+1. 按 [Picora 插件协议](https://github.com/Alnitak44/Picora/blob/main/docs/PLUGINS.md)制作并测试 ZIP，在自己的公开 GitHub 仓库创建 Release，上传 ZIP 附件。
+2. Fork 本仓库，在 `registrations/<插件 ID>.json` 新增一份登记文件，然后提交 PR。[ImgBB 登记示例](examples/io.github.ruzmarin.picora.imgbb.json)可作为起点。
+3. CI 从 Release 读取 ZIP，检查 ID、运行时、请求权限和包结构，并自动生成 `index.json` 与上面的表格。维护者审核首发插件及其请求权限后合并。
+4. 后续发布新版本的 ZIP 即可。仓库计划每小时检查 Release；若请求权限发生变化，需要通过 PR 更新登记文件并接受审核。
 
-目录使用 [MIT](LICENSE) 协议。插件保留作者自己的版权与许可证。
+投稿时无需手填下载 URL、ZIP 大小或 SHA-256。这些值仍保留在机器生成的 `index.json` 中，供客户端安全下载。插件源码与许可证归作者维护；目录使用 [MIT](LICENSE) 协议。
