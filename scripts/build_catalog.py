@@ -81,7 +81,7 @@ def load_registration(path):
     return item
 
 
-def parse_package(data, registration):
+def parse_package(data, registration, check_permissions=True):
     if len(data) > MAX_ZIP:
         fail("ZIP exceeds 10 MB")
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -124,7 +124,7 @@ def parse_package(data, registration):
     actual_permissions = normalized_permissions(program)
     approved = registration["approvedPermissions"].copy()
     approved["network"] = sorted(approved["network"])
-    if actual_permissions != approved:
+    if check_permissions and actual_permissions != approved:
         fail(f"{registration['id']}: permissions changed; update registration through review")
     required = {"name": 60, "description": 160, "author": 80, "version": 30}
     for field, limit in required.items():
@@ -202,14 +202,17 @@ def build(registrations, github):
                 if not url.lower().startswith(expected_prefix.lower()):
                     fail(f"{registration['id']}: asset is not in its release repository")
                 data = github.asset(url)
-                entry = parse_package(data, registration)
+                entry = parse_package(data, registration, check_permissions=False)
                 if entry is None:
                     continue
                 entry["downloadUrl"] = url
-                candidates.append(entry)
+                candidates.append((entry, data))
         if not candidates:
             fail(f"{registration['id']}: no matching published ZIP release")
-        entries.append(max(candidates, key=lambda entry: version_key(entry["version"])))
+        latest, latest_data = max(candidates, key=lambda candidate: version_key(candidate[0]["version"]))
+        validated = parse_package(latest_data, registration)
+        validated["downloadUrl"] = latest["downloadUrl"]
+        entries.append(validated)
     entries.sort(key=lambda entry: entry["id"])
     return {"schemaVersion": 1, "plugins": entries}
 

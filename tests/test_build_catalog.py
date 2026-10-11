@@ -102,6 +102,16 @@ class CatalogBuilderTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "permissions changed"):
             parse_package(package(network=["evil.example"]), REGISTRATION)
 
+    def test_approved_update_allows_older_release_permissions(self):
+        github = FakeGitHub(["1.0.0", "1.1.0"])
+        old_url = next(url for url in github.assets if "/v1.0.0/" in url)
+        github.assets[old_url] = package("1.0.0", network=["old.example"])
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            catalog = build(Path(temp), github)
+        self.assertEqual(catalog["plugins"][0]["version"], "1.1.0")
+
     def test_account_namespace_and_legacy_exception(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
             path = Path(temp) / f"{PLUGIN_ID}.json"
