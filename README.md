@@ -11,8 +11,6 @@
 | [Telegraph-Image](https://github.com/Alnitak44/Picora/tree/main/plugins/telegraph-image) | 1.1.1 | 连接 cf-pages/Telegraph-Image 自建图床 |
 <!-- catalog:end -->
 
-在 Picora 的模块仓库中可以直接安装；表格中的插件名称链接到作者提供的源码或说明。这里不再单独维护下载链接。
-
 ## 投稿与更新
 
 详细步骤见 [贡献指南](CONTRIBUTING.md)。
