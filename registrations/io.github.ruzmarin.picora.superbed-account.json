@@ -1,0 +1,11 @@
+{
+  "id": "io.github.ruzmarin.picora.superbed-account",
+  "releaseRepository": "ruzmariN/picora-plugin-superbed-account",
+  "minAppVersion": "1.0.4",
+  "approvedPermissions": {
+    "network": ["www.superbed.cn"],
+    "readSelectedFile": true,
+    "allowInsecureHttp": false,
+    "deleteUploadedFile": false
+  }
+}
