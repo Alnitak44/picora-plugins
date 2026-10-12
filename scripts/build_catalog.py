@@ -20,10 +20,30 @@ VERSION_RE = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-
 MAX_ZIP = 10 * 1024 * 1024
 MAX_UNPACKED = 20 * 1024 * 1024
 CATALOG_REPOSITORY = "Alnitak44/picora-plugins"
+PACKAGE_SUFFIX = ".picora-plugin.zip"
+ACCEPTED_SUFFIXES = (
+    PACKAGE_SUFFIX,
+    ".picora-plugin.zip.zip",
+    ".picora.plugin.zip",
+)
 
 
 def fail(message):
     raise ValueError(message)
+
+
+def action_escape(message):
+    return message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def warn(message):
+    print(f"catalog warning: {message}", file=sys.stderr)
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print(f"::warning::{action_escape(message)}", file=sys.stderr)
+
+
+def accepted_asset_name(name):
+    return next((suffix for suffix in ACCEPTED_SUFFIXES if name.endswith(suffix)), None)
 
 
 def version_key(value):
@@ -63,7 +83,10 @@ def load_registration(path):
     if not isinstance(repo, str) or not REPO_RE.fullmatch(repo):
         fail(f"{path}: invalid releaseRepository")
     if path.stem != plugin_id:
-        fail(f"{path}: filename must match plugin id")
+        if path.stem.lower() == plugin_id:
+            warn(f"{path}: 文件名大小写与 id 不同；已按 id={plugin_id} 读取。建议将文件改名为 {plugin_id}.json")
+        else:
+            fail(f"{path}: 文件名应为 {plugin_id}.json，当前是 {path.name}")
     if "legacy" in item:
         fail(f"{path}: legacy registration is not supported")
     if repo.lower() == CATALOG_REPOSITORY.lower():
@@ -83,7 +106,7 @@ def load_registration(path):
     return item
 
 
-def parse_package(data, registration, check_permissions=True):
+def parse_package(data, registration, check_permissions=True, observed_ids=None, emit_warnings=True):
     if len(data) > MAX_ZIP:
         fail("ZIP exceeds 10 MB")
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -107,13 +130,15 @@ def parse_package(data, registration, check_permissions=True):
         if bad_entry is not None:
             fail(f"ZIP CRC failed: {bad_entry}")
         if "plugin.json" not in names or "readme.md" not in names:
-            fail("ZIP is missing required root files")
+            fail("ZIP 根目录需要 plugin.json 和 readme.md；请打包文件夹里的内容，不要再套一层文件夹或 ZIP")
         metadata = json.loads(archive.read("plugin.json"))
         entry_path = metadata.get("entry")
         if not isinstance(entry_path, str) or not entry_path.endswith(".json") or entry_path not in names:
             fail("ZIP is missing the declared program entry")
         program = json.loads(archive.read(entry_path))
     if metadata.get("id") != registration["id"]:
+        if observed_ids is not None:
+            observed_ids.append(metadata.get("id"))
         return None
     if metadata.get("packageVersion") != 1:
         fail(f"{registration['id']}: unsupported package metadata")
@@ -127,7 +152,11 @@ def parse_package(data, registration, check_permissions=True):
     approved = registration["approvedPermissions"].copy()
     approved["network"] = sorted(approved["network"])
     if check_permissions and actual_permissions != approved:
-        fail(f"{registration['id']}: permissions changed; update registration through review")
+        fail(
+            f"{registration['id']}: uploader.json 的 permissions={json.dumps(actual_permissions, ensure_ascii=False)}；"
+            f"登记文件 approvedPermissions={json.dumps(approved, ensure_ascii=False)}。"
+            "请核对实际请求域名；若确需新权限，提交登记文件 PR 审核"
+        )
     required = {"name": 60, "description": 160, "author": 80, "version": 30}
     for field, limit in required.items():
         value = metadata.get(field)
@@ -135,11 +164,19 @@ def parse_package(data, registration, check_permissions=True):
             fail(f"{registration['id']}: invalid {field}")
     version_key(metadata["version"])
     repository = metadata.get("repository")
+    if repository is None:
+        repository = f"https://github.com/{registration['releaseRepository']}"
+        if emit_warnings:
+            warn(f"{registration['id']}: plugin.json 未写 repository；目录已使用登记仓库 {repository}")
     parsed_repo = urllib.parse.urlparse(repository) if isinstance(repository, str) else None
     if not parsed_repo or parsed_repo.scheme != "https" or parsed_repo.netloc != "github.com":
-        fail(f"{registration['id']}: repository must be a GitHub HTTPS URL")
+        fail(f"{registration['id']}: plugin.json 的 repository={repository!r}；应为 https://github.com/{registration['releaseRepository']}")
     if parsed_repo.path.rstrip("/").lower() != f"/{registration['releaseRepository'].lower()}":
-        fail(f"{registration['id']}: package repository differs from releaseRepository")
+        fail(
+            f"{registration['id']}: plugin.json 的 repository={repository}，"
+            f"但登记文件 releaseRepository={registration['releaseRepository']}；"
+            f"请将 repository 改为 https://github.com/{registration['releaseRepository']}"
+        )
     mark = metadata.get("mark")
     if not isinstance(mark, str) or not 1 <= len(mark) <= 3:
         mark = "P"
@@ -186,6 +223,7 @@ class GitHub:
 
 def build(registrations, github):
     entries = []
+    seen_ids = set()
     if not registrations.is_dir():
         fail("registrations directory is missing")
     paths = sorted(registrations.glob("*.json"))
@@ -193,27 +231,65 @@ def build(registrations, github):
         fail("catalog must contain at most 500 registrations")
     for path in paths:
         registration = load_registration(path)
+        if registration["id"] in seen_ids:
+            fail(f"{path}: 插件 ID {registration['id']} 重复；每个插件只能有一份登记文件")
+        seen_ids.add(registration["id"])
         candidates = []
+        observed_ids = []
+        published_releases = 0
+        asset_names = []
         for release in github.releases(registration["releaseRepository"]):
             if release.get("draft") or release.get("prerelease"):
                 continue
+            published_releases += 1
             for asset in release.get("assets", []):
                 name = asset.get("name", "")
-                if not name.startswith(registration.get("assetPrefix", "")) or not name.endswith(".picora-plugin.zip"):
+                asset_names.append(name)
+                suffix = accepted_asset_name(name)
+                if not name.startswith(registration.get("assetPrefix", "")) or suffix is None:
                     continue
                 url = asset.get("browser_download_url", "")
                 expected_prefix = f"https://github.com/{registration['releaseRepository']}/releases/download/"
                 if not url.lower().startswith(expected_prefix.lower()):
                     fail(f"{registration['id']}: asset is not in its release repository")
                 data = github.asset(url)
-                entry = parse_package(data, registration, check_permissions=False)
+                try:
+                    entry = parse_package(
+                        data, registration, check_permissions=False,
+                        observed_ids=observed_ids, emit_warnings=False,
+                    )
+                except (ValueError, zipfile.BadZipFile) as error:
+                    fail(f"{registration['id']}: Release 附件 {name} 校验失败：{error}")
                 if entry is None:
                     continue
                 entry["downloadUrl"] = url
-                candidates.append((entry, data))
+                candidates.append((entry, data, name, suffix == PACKAGE_SUFFIX))
         if not candidates:
-            fail(f"{registration['id']}: no matching published ZIP release")
-        latest, latest_data = max(candidates, key=lambda candidate: version_key(candidate[0]["version"]))
+            if observed_ids:
+                fail(
+                    f"{registration['id']}: 发布的 ZIP 中 plugin.json 的 id 为 "
+                    f"{', '.join(repr(value) for value in observed_ids)}；"
+                    f"应与登记文件 id={registration['id']} 完全一致"
+                )
+            if not published_releases:
+                fail(
+                    f"{registration['id']}: {registration['releaseRepository']} 没有已发布的正式 Release；"
+                    "请先发布 Release 并上传插件 ZIP"
+                )
+            preview = ", ".join(repr(name) for name in asset_names[:5]) or "无附件"
+            fail(
+                f"{registration['id']}: {registration['releaseRepository']} 的 Release 未找到插件 ZIP；"
+                f"现有附件：{preview}。文件名应以 {PACKAGE_SUFFIX} 结尾"
+                + (f"，并以 {registration['assetPrefix']} 开头" if registration.get("assetPrefix") else "")
+            )
+        latest, latest_data, latest_name, canonical_name = max(
+            candidates, key=lambda candidate: (version_key(candidate[0]["version"]), candidate[3])
+        )
+        if not canonical_name:
+            warn(
+                f"{registration['id']}: Release 附件 {latest_name} 命名不规范，但 ZIP 校验通过，已自动收录；"
+                f"以后建议使用以 {PACKAGE_SUFFIX} 结尾的文件名"
+            )
         validated = parse_package(latest_data, registration)
         validated["downloadUrl"] = latest["downloadUrl"]
         entries.append(validated)
@@ -271,4 +347,6 @@ if __name__ == "__main__":
         main()
     except (ValueError, OSError, urllib.error.URLError, zipfile.BadZipFile) as error:
         print(f"catalog build failed: {error}", file=sys.stderr)
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            print(f"::error::{action_escape(str(error))}", file=sys.stderr)
         sys.exit(1)
