@@ -13,6 +13,14 @@
 
 投稿者无需填写 Release 下载地址、ZIP 大小、SHA-256，也无需把 ZIP 或插件源码复制到本目录仓库。所有插件（包括开发示例）在作者自己的独立仓库发布，目录仓库不托管插件 Release，不提供历史豁免。
 
+### 检查失败时
+
+在 PR 的 **Checks → Build plugin catalog → Validate proposed catalog** 查看错误。Action 会标出实际值和期望值；修正后提交到同一个 PR 分支即可重跑。已合并后的自动更新错误则在 **Actions → Build plugin catalog → Generate catalog** 查看。
+
+目录会兼容登记文件名中仅有大小写差异，以及 Release 附件的常见后缀笔误（`.picora-plugin.zip.zip`、`.picora.plugin.zip`），并显示警告。仍建议使用标准文件名 `<插件 ID>.json` 和以 `.picora-plugin.zip` 结尾的 ZIP。ZIP 中缺少 `repository` 时，目录会使用已审核的 `releaseRepository` 生成作者仓库链接。
+
+插件 ID、实际网络权限和已审核权限、明确填写的仓库地址仍须一致；这些涉及身份或权限，Action 不会猜测修改。ZIP 内的 `homepage` 是展示网站，`uploader.json` 中 `upload.url` 才是实际请求地址；登记文件的 `approvedPermissions.network` 应与 `uploader.json` 的 `permissions.network` 一致。
+
 ## 更新
 
 在作者仓库发布带有新 ZIP 的 GitHub Release，插件 ID 保持不变，版本按 SemVer 增加。目录计划每小时检查一次；通过验证后自动更新。不要修改已发布版本的附件。
@@ -31,10 +39,10 @@
 
 | 检查项 | 正确写法 |
 | --- | --- |
-| Release 附件名 | `imgloc-1.1.0.picora-plugin.zip`；必须以 `.picora-plugin.zip` 结尾，不能写成 `-picora-plugin.zip`，且不能是草稿、预发布或自动生成的 Source code ZIP。 |
+| Release 附件名 | 推荐 `imgloc-1.1.0.picora-plugin.zip`；常见的重复 `.zip` 或 `.picora.plugin.zip` 会在 ZIP 校验通过后自动兼容并提示警告。仍不能使用草稿、预发布或自动生成的 Source code ZIP。 |
 | 登记文件名 | `registrations/io.github.alnitak44.imgloc.json`；包含完整 ID 和 `.json` 后缀，与 ZIP 内的 `id` 一致。 |
 | 网络权限 | `"network": ["imgloc.com"]`；填写主机名，不带 `https://` 或路径，与入口程序权限一致。 |
-| 源码地址 | `releaseRepository` 使用 `用户名/仓库名`，ZIP 内 `repository` 使用同一仓库的根 URL。 |
+| 源码地址 | `releaseRepository` 使用 `用户名/仓库名`；ZIP 内 `repository` 若填写，须使用同一仓库的 HTTPS 根 URL。未填写时目录自动从登记文件补出链接。 |
 | 插件包结构 | `plugin.json`、入口 JSON、`readme.md` 和 `assets/` 直接位于 ZIP 根目录，不额外套目录。 |
 
 失败时在 **Actions → Build plugin catalog → 失败的运行 → build** 查看失败步骤，查找 `catalog build failed: …`。修正作者 Release 后重新运行工作流；修正登记文件则提交新修改触发校验。不要手动修改生成目录。
