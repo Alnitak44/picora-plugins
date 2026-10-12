@@ -50,6 +50,22 @@
       "downloadUrl": "https://github.com/ruzmariN/picora-plugin-imgbb/releases/download/v1.0.0/imgbb-1.0.0.picora-plugin.zip"
     },
     {
+      "id": "io.github.ruzmarin.picora.superbed-account",
+      "name": "聚合图床（账号登录版）",
+      "description": "使用聚合图床邮箱或用户名及密码上传图片，无需 API Key。",
+      "author": "迷迭香",
+      "repository": "https://github.com/ruzmariN/picora-plugin-superbed-account",
+      "version": "1.0.1",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.4",
+      "mark": "SBA",
+      "example": false,
+      "sha256": "18417b5f1914854cf20ed5a9d562dca6ba537468afaf3467a96102021645f0e7",
+      "size": 4074,
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-superbed-account/releases/download/v1.0.0/superbed-account-v1.0.0.picora-plugin.zip"
+    },
+    {
       "id": "io.github.ruzmarin.picora.superbed-api",
       "name": "聚合图床Superbed(API)",
       "description": "使用聚合图床 API Key上传。",
