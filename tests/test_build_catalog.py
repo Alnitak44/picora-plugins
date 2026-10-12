@@ -3,6 +3,7 @@ import json
 import tempfile
 import unittest
 import zipfile
+from contextlib import redirect_stderr
 from pathlib import Path
 
 from scripts.build_catalog import (
@@ -111,8 +112,17 @@ class CatalogBuilderTests(unittest.TestCase):
 
     def test_repository_mismatch_cannot_be_exempted(self):
         registration = {**REGISTRATION, "releaseRepository": "example/another-repo", "legacy": True}
-        with self.assertRaisesRegex(ValueError, "repository differs"):
+        with self.assertRaisesRegex(ValueError, "repository"):
             parse_package(package(), registration)
+
+    def test_filename_case_typo_is_accepted_without_changing_plugin_id(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / "io.github.Example.picora.demo.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            with redirect_stderr(io.StringIO()) as warnings:
+                catalog = build(Path(temp), FakeGitHub(["1.0.0"]))
+        self.assertEqual(catalog["plugins"][0]["id"], PLUGIN_ID)
+        self.assertIn(f"{PLUGIN_ID}.json", warnings.getvalue())
 
     def test_last_plugin_can_exit_without_fetching_its_releases(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
@@ -157,9 +167,54 @@ class CatalogBuilderTests(unittest.TestCase):
         self.assertIn("[Demo Image Host](https://github.com/example/picora-plugin-demo)", readme)
         self.assertNotIn("下载](https://", readme)
 
+    def test_common_release_asset_suffix_typos_are_accepted(self):
+        for suffix in (".picora-plugin.zip.zip", ".picora.plugin.zip"):
+            with self.subTest(suffix=suffix):
+                github = FakeGitHub(["1.0.0"])
+                asset = github.release_list[0]["assets"][0]
+                old_url = asset["browser_download_url"]
+                asset["name"] = f"demo-1.0.0{suffix}"
+                asset["browser_download_url"] = old_url.rsplit("/", 1)[0] + "/" + asset["name"]
+                github.assets[asset["browser_download_url"]] = github.assets.pop(old_url)
+                with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+                    path = Path(temp) / f"{PLUGIN_ID}.json"
+                    path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+                    with redirect_stderr(io.StringIO()) as warnings:
+                        catalog = build(Path(temp), github)
+                self.assertEqual(catalog["plugins"][0]["version"], "1.0.0")
+                self.assertTrue(catalog["plugins"][0]["downloadUrl"].endswith(suffix))
+                self.assertIn("命名不规范", warnings.getvalue())
+
+    def test_unmatched_release_explains_asset_name_or_package_id(self):
+        github = FakeGitHub(["1.0.0"])
+        asset = github.release_list[0]["assets"][0]
+        asset["name"] = "demo-1.0.0.zip"
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, r"demo-1\.0\.0\.zip.*\.picora-plugin\.zip"):
+                build(Path(temp), github)
+            asset["name"] = "demo-1.0.0.picora-plugin.zip"
+            github.assets[asset["browser_download_url"]] = package(
+                metadata_changes={"id": "io.github.example.picora.other"}
+            )
+            with self.assertRaisesRegex(ValueError, r"plugin\.json.*io\.github\.example\.picora\.other"):
+                build(Path(temp), github)
+
     def test_permission_change_is_not_auto_published(self):
-        with self.assertRaisesRegex(ValueError, "permissions changed"):
+        with self.assertRaisesRegex(ValueError, r"uploader\.json.*evil\.example.*api\.example\.com"):
             parse_package(package(network=["evil.example"]), REGISTRATION)
+
+    def test_missing_repository_uses_reviewed_release_repository(self):
+        with redirect_stderr(io.StringIO()) as warnings:
+            entry = parse_package(package(metadata_changes={"repository": None}), REGISTRATION)
+        self.assertEqual(entry["repository"], f"https://github.com/{REPOSITORY}")
+        self.assertIn("plugin.json 未写 repository", warnings.getvalue())
+        with self.assertRaisesRegex(ValueError, r"other/repo.*example/picora-plugin-demo"):
+            parse_package(
+                package(metadata_changes={"repository": "https://github.com/other/repo"}),
+                REGISTRATION,
+            )
 
     def test_approved_update_allows_older_release_permissions(self):
         github = FakeGitHub(["1.0.0", "1.1.0"])
