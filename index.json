@@ -48,6 +48,22 @@
       "sha256": "ed0dfbd829d1beae6b35d4531e6485290b0d0eea1771ca79b2e930ce55a61b65",
       "size": 3158,
       "downloadUrl": "https://github.com/ruzmariN/picora-plugin-imgbb/releases/download/v1.0.0/imgbb-1.0.0.picora-plugin.zip"
+    },
+    {
+      "id": "io.github.ruzmarin.picora.superbed-api",
+      "name": "聚合图床Superbed(API)",
+      "description": "使用聚合图床 API Key上传。",
+      "author": "迷迭香",
+      "repository": "https://github.com/ruzmariN/picora-plugins-superbed-api",
+      "version": "1.0.2",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.1",
+      "mark": "SBA",
+      "example": false,
+      "sha256": "c31a8acbabad97c8e7c38cb91ef1044d99efe9088d0f3a9cdeda70aeb4a67f68",
+      "size": 3424,
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugins-superbed-api/releases/download/v1.0.2/superbed-api-v1.0.2.picora-plugin.zip"
     }
   ]
 }
