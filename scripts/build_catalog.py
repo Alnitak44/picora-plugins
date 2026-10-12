@@ -19,7 +19,7 @@ REPO_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_.-]+$")
 VERSION_RE = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$")
 MAX_ZIP = 10 * 1024 * 1024
 MAX_UNPACKED = 20 * 1024 * 1024
-LEGACY_IDS = {"dev.picora.telegraph-image"}
+CATALOG_REPOSITORY = "Alnitak44/picora-plugins"
 
 
 def fail(message):
@@ -64,9 +64,11 @@ def load_registration(path):
         fail(f"{path}: invalid releaseRepository")
     if path.stem != plugin_id:
         fail(f"{path}: filename must match plugin id")
-    if item.get("legacy") and (plugin_id not in LEGACY_IDS or repo != "Alnitak44/picora-plugins"):
-        fail(f"{path}: legacy exception is reserved for existing plugins")
-    if not item.get("legacy") and not plugin_id.startswith(f"io.github.{repo.split('/')[0].lower()}."):
+    if "legacy" in item:
+        fail(f"{path}: legacy registration is not supported")
+    if repo.lower() == CATALOG_REPOSITORY.lower():
+        fail(f"{path}: plugins must publish in their own repository")
+    if not plugin_id.startswith(f"io.github.{repo.split('/')[0].lower()}."):
         fail(f"{path}: id must use the GitHub owner's io.github namespace")
     min_version = item.get("minAppVersion")
     if not isinstance(min_version, str):
@@ -136,7 +138,7 @@ def parse_package(data, registration, check_permissions=True):
     parsed_repo = urllib.parse.urlparse(repository) if isinstance(repository, str) else None
     if not parsed_repo or parsed_repo.scheme != "https" or parsed_repo.netloc != "github.com":
         fail(f"{registration['id']}: repository must be a GitHub HTTPS URL")
-    if not registration.get("legacy") and parsed_repo.path.rstrip("/").lower() != f"/{registration['releaseRepository'].lower()}":
+    if parsed_repo.path.rstrip("/").lower() != f"/{registration['releaseRepository'].lower()}":
         fail(f"{registration['id']}: package repository differs from releaseRepository")
     mark = metadata.get("mark")
     if not isinstance(mark, str) or not 1 <= len(mark) <= 3:

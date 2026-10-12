@@ -84,17 +84,35 @@ class FakeGitHub:
 
 
 class CatalogBuilderTests(unittest.TestCase):
-    def test_removed_imgloc_cannot_use_legacy_registration(self):
+    def test_historical_plugins_cannot_use_legacy_registration(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
-            path = Path(temp) / "com.imgloc.picora.json"
+            for plugin_id in ["com.imgloc.picora", "dev.picora.telegraph-image"]:
+                path = Path(temp) / f"{plugin_id}.json"
+                path.write_text(json.dumps({
+                    **REGISTRATION,
+                    "id": plugin_id,
+                    "releaseRepository": "Alnitak44/picora-plugins",
+                    "legacy": True,
+                }), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "legacy registration"):
+                    load_registration(path)
+
+    def test_catalog_repository_cannot_host_plugin_releases(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            plugin_id = "io.github.alnitak44.demo"
+            path = Path(temp) / f"{plugin_id}.json"
             path.write_text(json.dumps({
                 **REGISTRATION,
-                "id": "com.imgloc.picora",
+                "id": plugin_id,
                 "releaseRepository": "Alnitak44/picora-plugins",
-                "legacy": True,
             }), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "legacy exception"):
+            with self.assertRaisesRegex(ValueError, "own repository"):
                 load_registration(path)
+
+    def test_repository_mismatch_cannot_be_exempted(self):
+        registration = {**REGISTRATION, "releaseRepository": "example/another-repo", "legacy": True}
+        with self.assertRaisesRegex(ValueError, "repository differs"):
+            parse_package(package(), registration)
 
     def test_last_plugin_can_exit_without_fetching_its_releases(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
@@ -153,15 +171,16 @@ class CatalogBuilderTests(unittest.TestCase):
             catalog = build(Path(temp), github)
         self.assertEqual(catalog["plugins"][0]["version"], "1.1.0")
 
-    def test_account_namespace_and_legacy_exception(self):
+    def test_account_namespace_and_unsupported_legacy_field(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
             path = Path(temp) / f"{PLUGIN_ID}.json"
             path.write_text(json.dumps({**REGISTRATION, "releaseRepository": "another/repo"}), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "io.github namespace"):
                 load_registration(path)
-            path.write_text(json.dumps({**REGISTRATION, "legacy": True}), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "legacy exception"):
-                load_registration(path)
+            for flag in [True, False]:
+                path.write_text(json.dumps({**REGISTRATION, "legacy": flag}), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "legacy registration"):
+                    load_registration(path)
 
     def test_semver_order(self):
         self.assertLess(version_key("1.0.0-beta.2"), version_key("1.0.0-beta.10"))

@@ -1,10 +1,8 @@
 {
-  "id": "dev.picora.telegraph-image",
-  "releaseRepository": "Alnitak44/picora-plugins",
-  "assetPrefix": "telegraph-image-",
+  "id": "io.github.alnitak44.telegraph-image",
+  "releaseRepository": "Alnitak44/picora-plugin-telegraph-image",
   "minAppVersion": "1.0.0",
   "example": true,
-  "legacy": true,
   "approvedPermissions": {
     "network": ["*"],
     "readSelectedFile": true,

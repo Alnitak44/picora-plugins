@@ -2,22 +2,6 @@
   "schemaVersion": 1,
   "plugins": [
     {
-      "id": "dev.picora.telegraph-image",
-      "name": "Telegraph-Image",
-      "description": "连接 cf-pages/Telegraph-Image 自建图床",
-      "author": "picgo-plugin-telegraph-image contributors",
-      "repository": "https://github.com/Alnitak44/Picora/tree/main/plugins/telegraph-image",
-      "version": "1.1.1",
-      "runtime": "http-v1",
-      "packageVersion": 1,
-      "minAppVersion": "1.0.0",
-      "mark": "TG",
-      "example": true,
-      "sha256": "0622f8fcb89e9952cf24629bbac33d082ee31e1c4785f595ad08c3a62eeb09fa",
-      "size": 3813,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugins/releases/download/telegraph-image-v1.1.1/telegraph-image-1.1.1.picora-plugin.zip"
-    },
-    {
       "id": "io.github.alnitak44.imgloc",
       "name": "ImgLoc 图床",
       "description": "ImgLoc 图片上传，自动获取刷新上传凭证。",
@@ -32,6 +16,22 @@
       "sha256": "4b90434980f78705b0ab84bcec07eab35e4a1ca1a8a719efbe68c4e7154d06e3",
       "size": 3558,
       "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.0/imgloc-1.1.0.picora-plugin.zip"
+    },
+    {
+      "id": "io.github.alnitak44.telegraph-image",
+      "name": "Telegraph-Image",
+      "description": "连接 cf-pages/Telegraph-Image 自建图床",
+      "author": "picgo-plugin-telegraph-image contributors",
+      "repository": "https://github.com/Alnitak44/picora-plugin-telegraph-image",
+      "version": "1.1.2",
+      "runtime": "http-v1",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.0",
+      "mark": "TG",
+      "example": true,
+      "sha256": "179aabc6a45a04e53e86f39179dcd53ac7163de2e5e728a4db4b100684c0a1f7",
+      "size": 3795,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.2/telegraph-image-1.1.2.picora-plugin.zip"
     },
     {
       "id": "io.github.ruzmarin.picora.imgbb",
