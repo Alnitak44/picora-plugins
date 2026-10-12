@@ -3,7 +3,7 @@
   "releaseRepository": "ruzmariN/picora-plugins-superbed-api",
   "minAppVersion": "1.0.1",
   "approvedPermissions": {
-    "network": ["www.superbed.cn"],
+    "network": ["api.superbed.cn"],
     "readSelectedFile": true,
     "allowInsecureHttp": false,
     "deleteUploadedFile": false
