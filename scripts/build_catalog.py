@@ -106,7 +106,7 @@ def load_registration(path):
     return item
 
 
-def parse_package(data, registration, check_permissions=True, observed_ids=None, emit_warnings=True):
+def parse_package(data, registration, check_permissions=True, observed_ids=None, emit_warnings=True, check_mark=True):
     if len(data) > MAX_ZIP:
         fail("ZIP exceeds 10 MB")
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -178,8 +178,15 @@ def parse_package(data, registration, check_permissions=True, observed_ids=None,
             f"请将 repository 改为 https://github.com/{registration['releaseRepository']}"
         )
     mark = metadata.get("mark")
-    if not isinstance(mark, str) or not 1 <= len(mark) <= 3:
+    if mark is None:
         mark = "P"
+    if check_mark:
+        if not isinstance(mark, str):
+            fail(f"{registration['id']}: plugin.json 的 mark 必须是字符串")
+        mark = mark.strip().upper()
+        # Dart String.length counts UTF-16 code units, including after uppercase.
+        if not 1 <= len(mark.encode("utf-16-le", errors="surrogatepass")) // 2 <= 3:
+            fail(f"{registration['id']}: plugin.json 的 mark 需要 1–3 个字符，当前为 {metadata.get('mark')!r}")
     return {
         "id": registration["id"],
         "name": metadata["name"],
@@ -256,7 +263,7 @@ def build(registrations, github):
                 try:
                     entry = parse_package(
                         data, registration, check_permissions=False,
-                        observed_ids=observed_ids, emit_warnings=False,
+                        observed_ids=observed_ids, emit_warnings=False, check_mark=False,
                     )
                 except (ValueError, zipfile.BadZipFile) as error:
                     fail(f"{registration['id']}: Release 附件 {name} 校验失败：{error}")

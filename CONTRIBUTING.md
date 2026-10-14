@@ -42,6 +42,7 @@
 | Release 附件名 | 推荐 `imgloc-1.1.0.picora-plugin.zip`；常见的重复 `.zip` 或 `.picora.plugin.zip` 会在 ZIP 校验通过后自动兼容并提示警告。仍不能使用草稿、预发布或自动生成的 Source code ZIP。 |
 | 登记文件名 | `registrations/io.github.alnitak44.imgloc.json`；包含完整 ID 和 `.json` 后缀，与 ZIP 内的 `id` 一致。 |
 | 网络权限 | `"network": ["imgloc.com"]`；填写主机名，不带 `https://` 或路径，与入口程序权限一致。 |
+| 图标文字 `mark` | 可省略，默认 `P`；填写时使用 1–3 个字符，例如 `SB`。非法值会阻止收录，修改插件包后须递增版本重新发布。 |
 | 源码地址 | `releaseRepository` 使用 `用户名/仓库名`；ZIP 内 `repository` 若填写，须使用同一仓库的 HTTPS 根 URL。未填写时目录自动从登记文件补出链接。 |
 | 插件包结构 | `plugin.json`、入口 JSON、`readme.md` 和 `assets/` 直接位于 ZIP 根目录，不额外套目录。 |
 

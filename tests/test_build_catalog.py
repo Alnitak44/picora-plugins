@@ -85,6 +85,39 @@ class FakeGitHub:
 
 
 class CatalogBuilderTests(unittest.TestCase):
+    def test_invalid_marks_cannot_be_replaced_by_catalog_fallback(self):
+        for mark in ["SBac", "", "   ", "  SBac  ", "ßß", "😀😀", 123, True, []]:
+            with self.subTest(mark=mark):
+                with self.assertRaisesRegex(ValueError, "mark"):
+                    parse_package(package(metadata_changes={"mark": mark}), REGISTRATION)
+
+    def test_marks_follow_client_trimming_uppercase_and_utf16_length(self):
+        for mark, expected in [(None, "P"), ("sb", "SB"), (" sb ", "SB"), ("SBA", "SBA"), ("😀", "😀")]:
+            with self.subTest(mark=mark):
+                parsed = parse_package(package(metadata_changes={"mark": mark}), REGISTRATION)
+                self.assertEqual(parsed["mark"], expected)
+
+    def test_latest_invalid_mark_blocks_catalog_generation(self):
+        github = FakeGitHub(["1.0.0", "1.0.1"])
+        latest_url = github.release_list[-1]["assets"][0]["browser_download_url"]
+        github.assets[latest_url] = package("1.0.1", metadata_changes={"mark": "SBac"})
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "mark.*1–3"):
+                build(Path(temp), github)
+
+    def test_fixed_release_is_not_blocked_by_historical_invalid_mark(self):
+        github = FakeGitHub(["1.0.0", "1.0.1"])
+        old_url = github.release_list[0]["assets"][0]["browser_download_url"]
+        github.assets[old_url] = package("1.0.0", metadata_changes={"mark": "SBac"})
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            entry = build(Path(temp), github)["plugins"][0]
+        self.assertEqual(entry["version"], "1.0.1")
+        self.assertEqual(entry["mark"], "DE")
+
     def test_historical_plugins_cannot_use_legacy_registration(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
             for plugin_id in ["com.imgloc.picora", "dev.picora.telegraph-image"]:
