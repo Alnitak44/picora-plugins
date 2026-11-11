@@ -18,6 +18,22 @@
       "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.0/imgloc-1.1.0.picora-plugin.zip"
     },
     {
+      "id": "io.github.alnitak44.picora.easyimages2",
+      "name": "简单图床",
+      "description": "连接 EasyImages2.0 自建简单图床，用 API Token 上传，支持单张图片云端删除。",
+      "author": "Alnitak44 & DeepSeek",
+      "repository": "https://github.com/Alnitak44/picora-plugin-easyimages",
+      "version": "1.1.0",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.9",
+      "mark": "EI",
+      "example": false,
+      "sha256": "e098562c78638ca653d101761e2388535a79e650b28dae3bfc8d22d6d3dcc8ce",
+      "size": 5728,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-easyimages/releases/download/v1.1.0/easyimages2-1.1.0.picora-plugin.zip"
+    },
+    {
       "id": "io.github.alnitak44.telegraph-image",
       "name": "Telegraph-Image",
       "description": "连接 cf-pages/Telegraph-Image 自建图床",
