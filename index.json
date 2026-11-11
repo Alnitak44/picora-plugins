@@ -21,17 +21,17 @@
       "id": "io.github.alnitak44.telegraph-image",
       "name": "Telegraph-Image",
       "description": "连接 cf-pages/Telegraph-Image 自建图床",
-      "author": "picgo-plugin-telegraph-image contributors",
+      "author": "Alnitak44",
       "repository": "https://github.com/Alnitak44/picora-plugin-telegraph-image",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "runtime": "http-v1",
       "packageVersion": 1,
       "minAppVersion": "1.0.0",
       "mark": "TG",
       "example": true,
-      "sha256": "179aabc6a45a04e53e86f39179dcd53ac7163de2e5e728a4db4b100684c0a1f7",
-      "size": 3795,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.2/telegraph-image-1.1.2.picora-plugin.zip"
+      "sha256": "8725c291fc47091148132da4364b0d966857fcf70ecd0b3362fa513d8707c886",
+      "size": 3780,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.3/telegraph-image-1.1.3.picora-plugin.zip"
     },
     {
       "id": "io.github.ruzmarin.picora.imgbb",
