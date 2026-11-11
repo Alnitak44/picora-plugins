@@ -1,0 +1,12 @@
+{
+  "id": "io.github.alnitak44.picora.easyimages2",
+  "releaseRepository": "Alnitak44/picora-plugin-easyimages",
+  "assetPrefix": "easyimages2-",
+  "minAppVersion": "1.0.9",
+  "approvedPermissions": {
+    "network": ["config.baseUrl"],
+    "readSelectedFile": true,
+    "allowInsecureHttp": true,
+    "deleteUploadedFile": true
+  }
+}
