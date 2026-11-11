@@ -5,15 +5,13 @@
 ## 插件列表
 
 <!-- catalog:start -->
-
 | 插件 | 作者 | 版本 | 说明 |
-| :--- | :--- | :--- | :--- |
+| --- | --- | --- | --- |
 | [ImgLoc 图床](https://github.com/Alnitak44/picora-plugin-imgloc) | Alnitak44 | 1.1.0 | ImgLoc 图片上传，自动获取刷新上传凭证。 |
-| [Telegraph-Image](https://github.com/Alnitak44/picora-plugin-telegraph-image) | Alnitak44 | 1.1.2 | 连接 cf-pages/Telegraph-Image 自建图床 |
+| [Telegraph-Image](https://github.com/Alnitak44/picora-plugin-telegraph-image) | picgo-plugin-telegraph… | 1.1.2 | 连接 cf-pages/Telegraph-Image 自建图床 |
 | [ImgBB 图床](https://github.com/ruzmariN/picora-plugin-imgbb) | 迷迭香 | 1.0.0 | 使用 ImgBB API Key 上传图片并获取直链。 |
 | [聚合图床（账号登录版）](https://github.com/ruzmariN/picora-plugin-superbed-account) | 迷迭香、Alnitak44 | 1.0.3 | 使用聚合图床邮箱或用户名及密码上传图片，无需 API Key。 |
 | [聚合图床Superbed(API)](https://github.com/ruzmariN/picora-plugins-superbed-api) | 迷迭香 | 1.0.2 | 使用聚合图床 API Key上传。 |
-
 <!-- catalog:end -->
 
 ## 投稿与更新
