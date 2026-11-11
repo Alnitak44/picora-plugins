@@ -8,6 +8,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 import urllib.parse
 import urllib.error
 import urllib.request
@@ -304,15 +305,31 @@ def build(registrations, github):
     return {"schemaVersion": 1, "plugins": entries}
 
 
+def clip_width(text, limit=22):
+    """Keep the author column narrow; markdown cannot set column widths."""
+    width = 0
+    kept = []
+    for char in text:
+        char_width = 2 if unicodedata.east_asian_width(char) in ("W", "F") else 1
+        if width + char_width > limit:
+            return "".join(kept).rstrip() + "…"
+        width += char_width
+        kept.append(char)
+    return text
+
+
 def update_readme(source, catalog):
     start, end = "<!-- catalog:start -->", "<!-- catalog:end -->"
     if source.count(start) != 1 or source.count(end) != 1:
         fail("README.md is missing catalog markers")
-    lines = ["| 插件 | 版本 | 说明 |", "| --- | --- | --- |"]
+    lines = ["| 插件 | 作者 | 版本 | 说明 |", "| --- | --- | --- | --- |"]
     for entry in catalog["plugins"]:
         name = entry["name"].replace("|", "\\|")
+        author = clip_width(entry["author"].replace("|", "\\|"))
         description = entry["description"].replace("|", "\\|").replace("\n", " ")
-        lines.append(f"| [{name}]({entry['repository']}) | {entry['version']} | {description} |")
+        lines.append(
+            f"| [{name}]({entry['repository']}) | {author} | {entry['version']} | {description} |"
+        )
     return source.split(start)[0] + start + "\n" + "\n".join(lines) + "\n" + end + source.split(end)[1]
 
 

@@ -2,25 +2,32 @@
 
 [Picora](https://github.com/Alnitak44/Picora) 的在线插件目录。客户端读取自动生成的 [index.json](index.json)，从插件作者的 GitHub Release 下载 ZIP，并校验插件身份、版本、大小和 SHA-256。
 
-## 已收录插件
+## 插件列表
 
 <!-- catalog:start -->
-| 插件 | 版本 | 说明 |
-| --- | --- | --- |
-| [ImgLoc 图床](https://github.com/Alnitak44/picora-plugin-imgloc) | 1.1.0 | ImgLoc 图片上传，自动获取刷新上传凭证。 |
-| [Telegraph-Image](https://github.com/Alnitak44/picora-plugin-telegraph-image) | 1.1.2 | 连接 cf-pages/Telegraph-Image 自建图床 |
-| [ImgBB 图床](https://github.com/ruzmariN/picora-plugin-imgbb) | 1.0.0 | 使用 ImgBB API Key 上传图片并获取直链。 |
-| [聚合图床（账号登录版）](https://github.com/ruzmariN/picora-plugin-superbed-account) | 1.0.3 | 使用聚合图床邮箱或用户名及密码上传图片，无需 API Key。 |
-| [聚合图床Superbed(API)](https://github.com/ruzmariN/picora-plugins-superbed-api) | 1.0.2 | 使用聚合图床 API Key上传。 |
+
+| 插件 | 作者 | 版本 | 说明 |
+| :--- | :--- | :--- | :--- |
+| [ImgLoc 图床](https://github.com/Alnitak44/picora-plugin-imgloc) | Alnitak44 | 1.1.0 | ImgLoc 图片上传，自动获取刷新上传凭证。 |
+| [Telegraph-Image](https://github.com/Alnitak44/picora-plugin-telegraph-image) | Alnitak44 | 1.1.2 | 连接 cf-pages/Telegraph-Image 自建图床 |
+| [ImgBB 图床](https://github.com/ruzmariN/picora-plugin-imgbb) | 迷迭香 | 1.0.0 | 使用 ImgBB API Key 上传图片并获取直链。 |
+| [聚合图床（账号登录版）](https://github.com/ruzmariN/picora-plugin-superbed-account) | 迷迭香、Alnitak44 | 1.0.3 | 使用聚合图床邮箱或用户名及密码上传图片，无需 API Key。 |
+| [聚合图床Superbed(API)](https://github.com/ruzmariN/picora-plugins-superbed-api) | 迷迭香 | 1.0.2 | 使用聚合图床 API Key上传。 |
+
 <!-- catalog:end -->
 
 ## 投稿与更新
 
-详细步骤见 [贡献指南](CONTRIBUTING.md)；开发者可通过[退出收录](CONTRIBUTING.md#退出收录)申请移除自己的插件。
+详细步骤见 [贡献指南](CONTRIBUTING.md)；开发者可通过[退出收录](CONTRIBUTING.md#%E9%80%80%E5%87%BA%E6%94%B6%E5%BD%95)申请移除自己的插件。
 
-1. 按 [Picora 插件协议](https://github.com/Alnitak44/Picora/blob/main/docs/PLUGINS.md)制作并测试 ZIP，在自己的公开 GitHub 仓库创建 Release，上传 ZIP 附件。
+1. 按 [Picora 插件协议](docs/PLUGINS.md)制作并测试 ZIP，在自己的公开 GitHub 仓库创建 Release，上传 ZIP 附件。
 2. Fork 本仓库，在 `registrations/<插件 ID>.json` 新增一份登记文件，然后提交 PR。[通用登记示例](examples/io.github.example.picora.demo.json)可作为起点。
 3. CI 从 Release 读取 ZIP，检查 ID、运行时、请求权限和包结构，并自动生成 `index.json` 与上面的表格。维护者审核首发插件及其请求权限后合并。
 4. 后续发布新版本的 ZIP 即可。仓库计划每小时检查 Release；若请求权限发生变化，需要通过 PR 更新登记文件并接受审核。
 
 投稿时无需手填下载 URL、ZIP 大小或 SHA-256。这些值仍保留在机器生成的 `index.json` 中，供客户端安全下载。插件源码与许可证归作者维护；目录使用 [MIT](LICENSE) 协议。
+
+## 文档
+
+[插件开放说明](docs/%E6%8F%92%E4%BB%B6%E5%BC%80%E6%94%BE%E8%AF%B4%E6%98%8E.md) · [插件协议](docs/PLUGINS.md) · [插件提交流程](docs/%E6%8F%92%E4%BB%B6%E6%8F%90%E4%BA%A4%E6%B5%81%E7%A8%8B.md) · [贡献指南](CONTRIBUTING.md)
+

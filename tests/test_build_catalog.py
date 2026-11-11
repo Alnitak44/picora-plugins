@@ -172,7 +172,7 @@ class CatalogBuilderTests(unittest.TestCase):
             catalog,
         )
         self.assertNotIn("Demo Image Host", readme)
-        self.assertIn("| 插件 | 版本 | 说明 |", readme)
+        self.assertIn("| 插件 | 作者 | 版本 | 说明 |", readme)
 
     def test_missing_registration_directory_cannot_clear_catalog(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
@@ -199,6 +199,36 @@ class CatalogBuilderTests(unittest.TestCase):
         readme = update_readme("before\n<!-- catalog:start -->\nold\n<!-- catalog:end -->\nafter", catalog)
         self.assertIn("[Demo Image Host](https://github.com/example/picora-plugin-demo)", readme)
         self.assertNotIn("下载](https://", readme)
+        self.assertIn("| 作者 |", readme)
+
+    def test_readme_lists_author_between_plugin_and_version(self):
+        catalog = {
+            "schemaVersion": 1,
+            "plugins": [
+                {
+                    "id": PLUGIN_ID,
+                    "name": "Demo Image Host",
+                    "author": "迷迭香",
+                    "version": "1.0.0",
+                    "description": "示例",
+                    "repository": "https://github.com/example/picora-plugin-demo",
+                },
+                {
+                    "id": "io.github.example.picora.long",
+                    "name": "Long Author Host",
+                    "author": "picgo-plugin-telegraph-image contributors",
+                    "version": "2.0.0",
+                    "description": "长作者名",
+                    "repository": "https://github.com/example/picora-plugin-long",
+                },
+            ],
+        }
+        readme = update_readme("<!-- catalog:start -->\nold\n<!-- catalog:end -->", catalog)
+        self.assertIn("| [Demo Image Host](https://github.com/example/picora-plugin-demo) | 迷迭香 | 1.0.0 | 示例 |", readme)
+        clipped = [line for line in readme.splitlines() if "Long Author Host" in line][0]
+        self.assertIn("picgo-plugin-telegraph", clipped)
+        self.assertTrue(clipped.split("|")[2].strip().endswith("…"))
+        self.assertLessEqual(len(clipped.split("|")[2].strip()), 23)
 
     def test_common_release_asset_suffix_typos_are_accepted(self):
         for suffix in (".picora-plugin.zip.zip", ".picora.plugin.zip"):
