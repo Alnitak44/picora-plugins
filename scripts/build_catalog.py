@@ -28,6 +28,53 @@ ACCEPTED_SUFFIXES = (
     ".picora.plugin.zip",
 )
 
+# 目录里展示的链接只允许这些平台；插件自身声明的网络主机和登记文件
+# 审核过的 allowedLinks 会额外放行。教程里的链接会被用户直接点击打开。
+TRUSTED_LINK_HOSTS = {
+    "github.com",
+    "www.github.com",
+    "raw.githubusercontent.com",
+    "objects.githubusercontent.com",
+    "user-images.githubusercontent.com",
+    "camo.githubusercontent.com",
+}
+
+# 只收录明显违规或诈骗用语；正常描述里会出现的词（如“免费”）不要加进来，
+# 否则正常插件也会被拦下。命中即拒绝构建，不静默改写。
+BANNED_WORDS = (
+    "官方认证",
+    "官方授权",
+    "官网认证",
+    "加微信",
+    "加qq",
+    "加群",
+    "客服qq",
+    "扫码进群",
+    "领取红包",
+    "返利",
+    "刷单",
+    "日赚",
+    "兼职赚钱",
+    "破解版",
+    "激活码",
+    "代充",
+    "出售账号",
+    "购买账号",
+    "博彩",
+    "赌博",
+    "私彩",
+)
+
+# 名称不能被这些保留名占用，避免冒充官方。
+RESERVED_NAMES = ("picora", "picora插件", "picora官方")
+
+LINK_RE = re.compile(r"\]\(\s*<?([^)\s>]+)>?")
+BARE_URL_RE = re.compile(r"https?://[^\s<>)\]}`'\"，。；！？、]+", re.IGNORECASE)
+
+# RFC 2606 保留域名，文档里的占位地址（https://img.example.com 之类）不算外链。
+PLACEHOLDER_HOSTS = {"example.com", "example.org", "example.net"}
+PLACEHOLDER_SUFFIXES = (".example.com", ".example.org", ".example.net")
+
 
 def fail(message):
     raise ValueError(message)
@@ -54,6 +101,105 @@ def version_key(value):
     prerelease = match.group(4)
     parts = tuple((0, int(part)) if part.isdigit() else (1, part) for part in prerelease.split(".")) if prerelease else ()
     return tuple(int(match.group(i)) for i in (1, 2, 3)) + (0 if prerelease else 1, parts)
+
+
+def normalize_name(value):
+    """Fold a plugin name so lookalikes compare equal."""
+    text = unicodedata.normalize("NFKC", value).casefold()
+    return re.sub(r"[\s\-_·.。:：|/\\()（）\[\]【】{}<>+&*~,，!！?？'\"]", "", text)
+
+
+def edit_distance(left, right, limit=2):
+    if abs(len(left) - len(right)) > limit:
+        return limit + 1
+    previous = list(range(len(right) + 1))
+    for i, left_char in enumerate(left, 1):
+        current = [i]
+        for j, right_char in enumerate(right, 1):
+            current.append(
+                min(
+                    previous[j] + 1,
+                    current[j - 1] + 1,
+                    previous[j - 1] + (left_char != right_char),
+                )
+            )
+        previous = current
+    return previous[-1]
+
+
+def names_collide(left, right):
+    if not left or not right:
+        return False
+    if left == right:
+        return True
+    shorter, longer = sorted((left, right), key=len)
+    if len(shorter) >= 3 and shorter in longer:
+        return True
+    return len(shorter) >= 4 and edit_distance(left, right) <= 2
+
+
+def check_impersonation(entries):
+    """Reject names that duplicate or imitate another plugin or the official name."""
+    seen = {}
+    reserved = {normalize_name(name) for name in RESERVED_NAMES}
+    for entry in entries:
+        normalized = normalize_name(entry["name"])
+        for existing in reserved:
+            if names_collide(normalized, existing):
+                fail(f"{entry['id']}: 插件名 {entry['name']!r} 与 Picora 官方名称过于接近；请改用能区分来源的名称")
+        for other_id, other_name, other_normalized in seen.values():
+            if names_collide(normalized, other_normalized):
+                fail(
+                    f"{entry['id']}: 插件名 {entry['name']!r} 与已收录插件 {other_name!r}（{other_id}）"
+                    "重复或过于接近；请改用能区分来源的名称"
+                )
+        seen[entry["id"]] = (entry["id"], entry["name"], normalized)
+
+
+def check_banned_words(plugin_id, field, text):
+    folded = unicodedata.normalize("NFKC", text).casefold()
+    for word in BANNED_WORDS:
+        if word in folded:
+            fail(f"{plugin_id}: {field} 含违规内容 {word!r}；请修改后重新发布")
+
+
+def base_domain(host):
+    labels = host.lower().strip(".").split(".")
+    return ".".join(labels[-2:]) if len(labels) >= 2 else host.lower()
+
+
+def allowed_link_hosts(registration):
+    """Trusted platforms plus the plugin's own request hosts and their domain."""
+    hosts = set(TRUSTED_LINK_HOSTS)
+    extra = [host for host in registration["approvedPermissions"]["network"] if host != "*"]
+    extra += registration.get("allowedLinks", [])
+    for host in extra:
+        host = host.lower()
+        hosts.add(host)
+        hosts.add(base_domain(host))
+    return hosts
+
+
+def check_links(plugin_id, field, text, hosts):
+    links = LINK_RE.findall(text) + BARE_URL_RE.findall(text)
+    for link in links:
+        link = link.rstrip("`'\".,;:!?，。；：！？、")
+        parsed = urllib.parse.urlparse(link)
+        if parsed.scheme in ("", "mailto"):
+            continue
+        if parsed.scheme not in ("http", "https"):
+            fail(f"{plugin_id}: {field} 含不支持的链接 {link}")
+        host = parsed.netloc.rsplit("@", 1)[-1].split(":")[0].lower()
+        # 文档里常见「https://你的域名」这类占位写法，不是真实外链。
+        if not host or not host.isascii() or not re.fullmatch(r"[a-z0-9.-]+", host):
+            continue
+        if host in PLACEHOLDER_HOSTS or host.endswith(PLACEHOLDER_SUFFIXES):
+            continue
+        if host not in hosts and base_domain(host) not in hosts:
+            fail(
+                f"{plugin_id}: {field} 里的链接指向 {host}，不在允许范围。"
+                "教程与主页只能链接 GitHub、插件自身的请求主机，或登记文件 allowedLinks 审核过的域名"
+            )
 
 
 def normalized_permissions(program):
@@ -101,6 +247,12 @@ def load_registration(path):
     prefix = item.get("assetPrefix", "")
     if not isinstance(prefix, str) or "/" in prefix or "\\" in prefix:
         fail(f"{path}: invalid assetPrefix")
+    allowed_links = item.get("allowedLinks", [])
+    if not isinstance(allowed_links, list) or any(
+        not isinstance(host, str) or not host.strip() or "/" in host or ":" in host
+        for host in allowed_links
+    ):
+        fail(f"{path}: allowedLinks 必须是主机名数组，例如 [\"docs.example.com\"]")
     approved = item.get("approvedPermissions")
     if not isinstance(approved, dict) or not isinstance(approved.get("network"), list):
         fail(f"{path}: missing approvedPermissions")
@@ -137,6 +289,7 @@ def parse_package(data, registration, check_permissions=True, observed_ids=None,
         if not isinstance(entry_path, str) or not entry_path.endswith(".json") or entry_path not in names:
             fail("ZIP is missing the declared program entry")
         program = json.loads(archive.read(entry_path))
+        readme = archive.read("readme.md").decode("utf-8", "replace")
     if metadata.get("id") != registration["id"]:
         if observed_ids is not None:
             observed_ids.append(metadata.get("id"))
@@ -164,6 +317,16 @@ def parse_package(data, registration, check_permissions=True, observed_ids=None,
         if not isinstance(value, str) or not value or len(value) > limit:
             fail(f"{registration['id']}: invalid {field}")
     version_key(metadata["version"])
+    for field in ("name", "description", "author"):
+        check_banned_words(registration["id"], field, metadata[field])
+    check_banned_words(registration["id"], "readme.md", readme)
+    hosts = allowed_link_hosts(registration)
+    check_links(registration["id"], "readme.md", readme, hosts)
+    homepage = metadata.get("homepage")
+    if homepage is not None:
+        if not isinstance(homepage, str) or not homepage.strip():
+            fail(f"{registration['id']}: plugin.json 的 homepage 必须是字符串")
+        check_links(registration["id"], "homepage", homepage, hosts)
     repository = metadata.get("repository")
     if repository is None:
         repository = f"https://github.com/{registration['releaseRepository']}"
@@ -300,7 +463,13 @@ def build(registrations, github):
             )
         validated = parse_package(latest_data, registration)
         validated["downloadUrl"] = latest["downloadUrl"]
+        if "*" in registration["approvedPermissions"]["network"]:
+            warn(
+                f"{registration['id']}: approvedPermissions 允许任意主机（*）；"
+                "该插件可以改写请求目标，首次收录与权限变更时需人工确认"
+            )
         entries.append(validated)
+    check_impersonation(entries)
     entries.sort(key=lambda entry: entry["id"])
     return {"schemaVersion": 1, "plugins": entries}
 

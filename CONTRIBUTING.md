@@ -9,9 +9,12 @@
    - `releaseRepository`：`用户名/仓库名`。ZIP 元信息中的 `repository` 应指向这个仓库。
    - `minAppVersion`：插件所需的 Picora 最低版本；`http-v2` 至少为 `1.0.1`。
    - `approvedPermissions`：与 ZIP 内入口 JSON 的 `permissions` 对应。网络目标会在首次收录时由维护者审核。
+   - `allowedLinks`（可选）：教程或主页确需指向第三方域名时，在这里列出主机名，例如 `["docs.example.org"]`，经审核后才会放行。
 4. CI 读取该仓库的公开 Release，验证插件 ZIP 并预览生成的目录。维护者审核后合并，自动更新客户端读取的 `index.json`。
 
 投稿者无需填写 Release 下载地址、ZIP 大小、SHA-256，也无需把 ZIP 或插件源码复制到本目录仓库。所有插件（包括开发示例）在作者自己的独立仓库发布，目录仓库不托管插件 Release，不提供历史豁免。
+
+名称、简介、作者和 `readme.md` 会随新版本自动同步，因此每次构建都会重新检查：名称不能与已收录插件重复或近似、不能占用官方名义；文案不得含引流诈骗类用语；`readme.md` 与 `homepage` 的链接只能指向 GitHub、插件自身已批准的请求主机或 `allowedLinks` 中的域名。细节见[插件提交流程](docs/插件提交流程.md#名称内容与链接要求)。
 
 ### 检查失败时
 

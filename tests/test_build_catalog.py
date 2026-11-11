@@ -8,6 +8,7 @@ from pathlib import Path
 
 from scripts.build_catalog import (
     build,
+    check_impersonation,
     guard_existing_versions,
     load_registration,
     parse_package,
@@ -32,7 +33,7 @@ REGISTRATION = {
 }
 
 
-def package(version="1.0.0", network=None, metadata_changes=None):
+def package(version="1.0.0", network=None, metadata_changes=None, readme="# Demo"):
     metadata = {
         "packageVersion": 1,
         "runtime": "http-v2",
@@ -59,7 +60,7 @@ def package(version="1.0.0", network=None, metadata_changes=None):
     with zipfile.ZipFile(output, "w") as archive:
         archive.writestr("plugin.json", json.dumps(metadata))
         archive.writestr("uploader.json", json.dumps(program))
-        archive.writestr("readme.md", "# Demo")
+        archive.writestr("readme.md", readme)
     return output.getvalue()
 
 
@@ -178,6 +179,65 @@ class CatalogBuilderTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
             with self.assertRaisesRegex(ValueError, "directory is missing"):
                 build(Path(temp) / "missing", object())
+
+    def test_readme_links_must_stay_on_trusted_or_plugin_hosts(self):
+        allowed = package(
+            readme=(
+                "# Demo\n\n"
+                "[源码](https://github.com/example/picora-plugin-demo)\n"
+                "![图示](https://api.example.com/a.png)\n"
+                "占位写法 https://img.example.com/upload 和 https://你的域名/upload 不算外链。\n"
+            )
+        )
+        self.assertEqual(parse_package(allowed, REGISTRATION)["id"], PLUGIN_ID)
+        blocked = package(readme="把 token 发到 https://collect.evil.test/upload 即可")
+        with self.assertRaisesRegex(ValueError, "collect.evil.test"):
+            parse_package(blocked, REGISTRATION)
+
+    def test_homepage_follows_the_same_allowlist(self):
+        trusted = package(metadata_changes={"homepage": "https://api.example.com/"})
+        self.assertEqual(parse_package(trusted, REGISTRATION)["id"], PLUGIN_ID)
+        blocked = package(metadata_changes={"homepage": "https://phish.test/"})
+        with self.assertRaisesRegex(ValueError, "phish.test"):
+            parse_package(blocked, REGISTRATION)
+
+    def test_reviewed_allowed_links_extend_trusted_hosts(self):
+        data = package(metadata_changes={"homepage": "https://docs.demo-site.test/"})
+        with self.assertRaisesRegex(ValueError, "docs.demo-site.test"):
+            parse_package(data, REGISTRATION)
+        reviewed = {**REGISTRATION, "allowedLinks": ["demo-site.test"]}
+        self.assertEqual(parse_package(data, reviewed)["id"], PLUGIN_ID)
+
+    def test_banned_words_block_metadata_and_tutorials(self):
+        for changes in [
+            {"name": "Demo 官方认证版"},
+            {"description": "上传图片，加微信领红包"},
+            {"author": "客服QQ"},
+        ]:
+            with self.subTest(changes=changes):
+                with self.assertRaisesRegex(ValueError, "违规内容"):
+                    parse_package(package(metadata_changes=changes), REGISTRATION)
+        with self.assertRaisesRegex(ValueError, "违规内容"):
+            parse_package(package(readme="# Demo\n\n破解版下载"), REGISTRATION)
+
+    def test_plugin_names_cannot_imitate_other_plugins_or_official_names(self):
+        def catalog_with(names):
+            entries = []
+            for index, name in enumerate(names):
+                plugin_id = f"io.github.example.picora.demo{index}"
+                entries.append({"id": plugin_id, "name": name})
+            return entries
+
+        for names in [
+            ["ImgLoc 图床", "ImgLoc图床"],
+            ["ImgLoc 图床", "ImgLoc 图床 Pro"],
+            ["ImgLoc 图床", "ImgLoc 图库"],
+            ["Picora 官方插件"],
+        ]:
+            with self.subTest(names=names):
+                with self.assertRaisesRegex(ValueError, "名称"):
+                    check_impersonation(catalog_with(names))
+        check_impersonation(catalog_with(["ImgLoc 图床", "聚合图床", "ImgBB 图床"]))
 
     def test_package_cannot_self_assign_example_badge(self):
         data = package(metadata_changes={"example": True})
