@@ -25,7 +25,11 @@
 
 在作者仓库发布带有新 ZIP 的 GitHub Release，插件 ID 保持不变，版本按 SemVer 增加。目录计划每小时检查一次；通过验证后自动更新。不要修改已发布版本的附件。
 
+插件名称、作者、简介、图标、颜色和版本都取自 ZIP 内的 `plugin.json`，不写在登记文件里，所以这些内容改动只要随新版本发布就自动同步，不需要提 PR。同理，只有 `plugin.json` 里的改动才会进入目录，改源码仓库而不发 Release 不会生效。
+
 若新版本增加或改变网络目标、不安全 HTTP 或云端删除权限，自动更新会停止。请先对登记文件中的 `approvedPermissions` 提交 PR，说明变化并等待审核。Picora 用户安装更新时仍会看到插件的实际权限。
+
+开始使用 `http-v2`、条件 JSON 字段、`config[].role` 等新能力时，请一并提 PR 抬高登记文件的 `minAppVersion`：目录不会替你推导这个值，写低了会让旧客户端在安装阶段拒绝该插件。
 
 ## 退出收录
 
@@ -48,4 +52,4 @@
 
 失败时在 **Actions → Build plugin catalog → 失败的运行 → build** 查看失败步骤，查找 `catalog build failed: …`。修正作者 Release 后重新运行工作流；修正登记文件则提交新修改触发校验。不要手动修改生成目录。
 
-更多报错、版本更新与缓存问题见[完整排查说明](https://github.com/Alnitak44/Picora/blob/main/docs/插件提交流程.md#常见问题与排查)。
+更多报错、版本更新与缓存问题见[完整排查说明](docs/插件提交流程.md#常见问题与排查)。
