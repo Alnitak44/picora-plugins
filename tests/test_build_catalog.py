@@ -33,7 +33,7 @@ REGISTRATION = {
 }
 
 
-def package(version="1.0.0", network=None, metadata_changes=None, readme="# Demo"):
+def package(version="1.0.0", network=None, metadata_changes=None, readme="# Demo", program_changes=None):
     metadata = {
         "packageVersion": 1,
         "runtime": "http-v2",
@@ -55,6 +55,7 @@ def package(version="1.0.0", network=None, metadata_changes=None, readme="# Demo
         },
         "config": [],
         "upload": {},
+        **(program_changes or {}),
     }
     output = io.BytesIO()
     with zipfile.ZipFile(output, "w") as archive:
@@ -370,6 +371,48 @@ class CatalogBuilderTests(unittest.TestCase):
         changed = {"plugins": [{"id": PLUGIN_ID, "version": "1.0.0", "sha256": "b" * 64}]}
         with self.assertRaisesRegex(ValueError, "changed without a new version"):
             guard_existing_versions(old, changed)
+
+    def test_catalog_carries_tags_derived_from_config_roles(self):
+        entry = parse_package(package(), REGISTRATION)
+        self.assertEqual(entry["tags"], [])
+        self.assertFalse(entry["requiresAuth"])
+
+        fields = [
+            {"key": "baseUrl", "label": "地址", "type": "text", "role": "endpoint", "required": True},
+            {"key": "token", "label": "令牌", "type": "secret", "role": "token", "required": True},
+        ]
+        entry = parse_package(package(program_changes={"config": fields}), REGISTRATION)
+        self.assertEqual(entry["tags"], ["token", "custom-url"])
+        self.assertTrue(entry["requiresAuth"])
+
+        with_delete = parse_package(
+            package(program_changes={"config": fields, "delete": {"method": "GET", "url": "${upload.deleteKey}"}}),
+            REGISTRATION,
+        )
+        self.assertEqual(with_delete["tags"], ["token", "custom-url", "cloud-delete"])
+
+        # 旧插件没有 role 时，按必填字段推断展示标签。
+        secret_only = parse_package(
+            package(program_changes={"config": [{"key": "key", "label": "密钥", "type": "secret", "required": True}]}),
+            REGISTRATION,
+        )
+        self.assertEqual(secret_only["tags"], ["token"])
+        self.assertTrue(secret_only["requiresAuth"])
+
+        legacy = parse_package(
+            package(
+                program_changes={
+                    "config": [
+                        {"key": "baseUrl", "label": "图床基础 URL", "type": "text", "required": True},
+                        {"key": "apiKey", "label": "API Key", "type": "secret", "required": True},
+                        {"key": "username", "label": "用户名（可选）", "type": "text"},
+                    ]
+                }
+            ),
+            REGISTRATION,
+        )
+        self.assertEqual(legacy["tags"], ["token", "custom-url"])
+        self.assertTrue(legacy["requiresAuth"])
 
 
 if __name__ == "__main__":

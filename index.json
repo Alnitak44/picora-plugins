@@ -12,6 +12,8 @@
       "packageVersion": 1,
       "minAppVersion": "1.0.1",
       "mark": "IL",
+      "tags": [],
+      "requiresAuth": false,
       "example": false,
       "sha256": "4b90434980f78705b0ab84bcec07eab35e4a1ca1a8a719efbe68c4e7154d06e3",
       "size": 3558,
@@ -28,6 +30,12 @@
       "packageVersion": 1,
       "minAppVersion": "1.0.7",
       "mark": "EI",
+      "tags": [
+        "token",
+        "custom-url",
+        "cloud-delete"
+      ],
+      "requiresAuth": true,
       "example": false,
       "sha256": "e098562c78638ca653d101761e2388535a79e650b28dae3bfc8d22d6d3dcc8ce",
       "size": 5728,
@@ -44,6 +52,10 @@
       "packageVersion": 1,
       "minAppVersion": "1.0.0",
       "mark": "TG",
+      "tags": [
+        "custom-url"
+      ],
+      "requiresAuth": false,
       "example": true,
       "sha256": "8725c291fc47091148132da4364b0d966857fcf70ecd0b3362fa513d8707c886",
       "size": 3780,
@@ -60,6 +72,10 @@
       "packageVersion": 1,
       "minAppVersion": "1.0.1",
       "mark": "IB",
+      "tags": [
+        "token"
+      ],
+      "requiresAuth": true,
       "example": false,
       "sha256": "ed0dfbd829d1beae6b35d4531e6485290b0d0eea1771ca79b2e930ce55a61b65",
       "size": 3158,
@@ -76,6 +92,10 @@
       "packageVersion": 1,
       "minAppVersion": "1.0.4",
       "mark": "SBA",
+      "tags": [
+        "account"
+      ],
+      "requiresAuth": true,
       "example": false,
       "sha256": "51a4228844be9c0c56b24d944f5078ac16437ece0012c340c7532feccd1f1028",
       "size": 4077,
@@ -92,6 +112,10 @@
       "packageVersion": 1,
       "minAppVersion": "1.0.1",
       "mark": "SBA",
+      "tags": [
+        "token"
+      ],
+      "requiresAuth": true,
       "example": false,
       "sha256": "c31a8acbabad97c8e7c38cb91ef1044d99efe9088d0f3a9cdeda70aeb4a67f68",
       "size": 3424,

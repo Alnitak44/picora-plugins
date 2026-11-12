@@ -221,6 +221,60 @@ def normalized_permissions(program):
     }
 
 
+# 客户端只认这几个标签代码（顺序与 Dart 的 PluginTag 枚举一致），
+# 目录里多写未知标签会让旧客户端直接拒绝整个目录。
+ROLE_TAGS = {"token": "token", "account": "account", "endpoint": "custom-url"}
+TAG_ORDER = ("token", "account", "custom-url", "cloud-delete", "beta")
+
+
+def config_fields(program):
+    fields = program.get("config")
+    if fields is None:
+        return []
+    if not isinstance(fields, list):
+        fail("uploader.json 的 config 必须是数组")
+    return [field for field in fields if isinstance(field, dict)]
+
+
+def derived_tags(program):
+    """Mirror the client's tag derivation so the repository list can show chips."""
+    tags = set()
+    for field in config_fields(program):
+        tag = ROLE_TAGS.get(field.get("role")) or inferred_tag(field)
+        if tag:
+            tags.add(tag)
+    if program.get("delete"):
+        tags.add("cloud-delete")
+    # 测试版标签由客户端按版本号自动补，这里不重复写入。
+    return [tag for tag in TAG_ORDER if tag in tags]
+
+
+def inferred_tag(field):
+    """Display-only fallback for plugins that predate config roles."""
+    if field.get("required") is not True:
+        return None
+    key = str(field.get("key", "")).lower()
+    label = str(field.get("label", "")).lower()
+    secret = field.get("type") == "secret"
+    if secret and any(value in key or value in label for value in ("token", "key", "令牌", "密钥")):
+        return "token"
+    if not secret and (
+        key in {"account", "user", "username", "email", "login"}
+        or any(value in label for value in ("账号", "用户", "邮箱"))
+    ):
+        return "account"
+    if not secret and any(value in key for value in ("url", "endpoint", "host", "base")):
+        return "custom-url"
+    return None
+
+
+def derived_requires_auth(program):
+    fields = config_fields(program)
+    if any(field.get("type") == "secret" and field.get("required") is True for field in fields):
+        return True
+    return any(ROLE_TAGS.get(field.get("role")) in ("token", "account") for field in fields)
+
+
 def load_registration(path):
     item = json.loads(path.read_text(encoding="utf-8"))
     plugin_id = item.get("id")
@@ -362,6 +416,8 @@ def parse_package(data, registration, check_permissions=True, observed_ids=None,
         "packageVersion": 1,
         "minAppVersion": minimum,
         "mark": mark,
+        "tags": derived_tags(program),
+        "requiresAuth": derived_requires_auth(program),
         "example": registration.get("example") is True,
         "sha256": hashlib.sha256(data).hexdigest(),
         "size": len(data),
