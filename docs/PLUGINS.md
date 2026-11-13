@@ -33,9 +33,9 @@ Picora 原生插件使用 **ZIP 包 + 声明式 HTTP 请求**，不执行脚本�
 | `http-v1` | `schemaVersion: 1` | `1.0.0` | 基础单次上传 |
 | `http-v2` | `schemaVersion: 2` | `1.0.1` | 前置请求、凭证缓存、业务判断、受控刷新与单张删除 |
 | `http-v2` + `conditional-json-fields` | `schemaVersion: 2` | `1.0.4` | 按配置值选择 JSON 请求字段 |
-| `config[].role` | `schemaVersion: 1 / 2` | `1.0.9` | 从字段语义推导插件属性标签 |
+| `config[].role` | `schemaVersion: 1 / 2` | `1.0.7` | 从字段语义推导插件属性标签 |
 
-`plugin.json` 的 `runtime` 必须与入口程序的 `schemaVersion` 对应。发布到模块仓库时，登记文件的 `minAppVersion` 应覆盖插件使用的全部能力，例如使用 `role` 时不得低于 `1.0.9`；旧版本会因未知字段拒绝安装。插件属性标签由字段的 `role` 推导，登记文件不需要声明。
+`plugin.json` 的 `runtime` 必须与入口程序的 `schemaVersion` 对应。发布到模块仓库时，登记文件的 `minAppVersion` 应覆盖插件使用的全部能力，例如使用 `role` 时不得低于 `1.0.7`；旧版本会因未知字段拒绝安装。插件属性标签由字段的 `role` 推导，登记文件不需要声明。
 
 未知程序字段、不支持的运行时或能力、越权模板引用均会在安装阶段报错，不会忽略关键字段。PicGo 的 Node.js 插件不能直接作为 Picora 原生插件安装。
 
@@ -433,7 +433,7 @@ v2 删除由用户在图片详情中单独确认，或在已开启同步删除�
 
 同 ID 更新会替换程序、教程和资源，保留配置与启用状态。允许同版本重装，拒绝降级；插件版本遵循 SemVer，`id` 和 `config.key` 应保持稳定。更新后，云端删除权限需要用户重新开启。
 
-`role` 只影响列表展示，不改变表单、请求或权限，因此调整它不需要重新审核权限；但首次使用 `role` 需要把 `minAppVersion` 提到 `1.0.9`。
+`role` 只影响列表展示，不改变表单、请求或权限，因此调整它不需要重新审核权限；但首次使用 `role` 需要把 `minAppVersion` 提到 `1.0.7`。
 
 ### 资源限制
 
