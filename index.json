@@ -7,7 +7,7 @@
       "description": "ImgLoc 图片上传，自动获取刷新上传凭证。",
       "author": "Alnitak44",
       "repository": "https://github.com/Alnitak44/picora-plugin-imgloc",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "runtime": "http-v2",
       "packageVersion": 1,
       "minAppVersion": "1.0.1",
@@ -15,9 +15,9 @@
       "tags": [],
       "requiresAuth": false,
       "example": false,
-      "sha256": "4b90434980f78705b0ab84bcec07eab35e4a1ca1a8a719efbe68c4e7154d06e3",
-      "size": 3558,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.0/imgloc-1.1.0.picora-plugin.zip"
+      "sha256": "179cb8b3177e3c089d7301621062bf573e7ef06d89d5fbd21cbe78599d06ee1e",
+      "size": 17084,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.1/imgloc-1.1.1.picora-plugin.zip"
     },
     {
       "id": "io.github.alnitak44.picora.easyimages2",
@@ -47,7 +47,7 @@
       "description": "连接 cf-pages/Telegraph-Image 自建图床",
       "author": "Alnitak44",
       "repository": "https://github.com/Alnitak44/picora-plugin-telegraph-image",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "runtime": "http-v1",
       "packageVersion": 1,
       "minAppVersion": "1.0.7",
@@ -57,9 +57,9 @@
       ],
       "requiresAuth": false,
       "example": true,
-      "sha256": "8725c291fc47091148132da4364b0d966857fcf70ecd0b3362fa513d8707c886",
-      "size": 3780,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.3/telegraph-image-1.1.3.picora-plugin.zip"
+      "sha256": "59267b5676bbaa094659e967a8bc305cda2c0aed8a50da983265178be31b23d1",
+      "size": 3850,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.4/telegraph-image-1.1.4.picora-plugin.zip"
     },
     {
       "id": "io.github.nmotp.picora.cfimgbed",
