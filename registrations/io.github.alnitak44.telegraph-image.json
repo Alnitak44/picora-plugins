@@ -1,7 +1,7 @@
 {
   "id": "io.github.alnitak44.telegraph-image",
   "releaseRepository": "Alnitak44/picora-plugin-telegraph-image",
-  "minAppVersion": "1.0.0",
+  "minAppVersion": "1.0.7",
   "example": true,
   "approvedPermissions": {
     "network": ["*"],

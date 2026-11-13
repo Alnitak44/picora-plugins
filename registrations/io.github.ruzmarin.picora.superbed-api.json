@@ -1,7 +1,7 @@
 {
   "id": "io.github.ruzmarin.picora.superbed-api",
   "releaseRepository": "ruzmariN/picora-plugins-superbed-api",
-  "minAppVersion": "1.0.1",
+  "minAppVersion": "1.0.7",
   "approvedPermissions": {
     "network": ["api.superbed.cn"],
     "readSelectedFile": true,
