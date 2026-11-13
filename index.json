@@ -50,7 +50,7 @@
       "version": "1.1.3",
       "runtime": "http-v1",
       "packageVersion": 1,
-      "minAppVersion": "1.0.0",
+      "minAppVersion": "1.0.7",
       "mark": "TG",
       "tags": [
         "custom-url"
@@ -91,7 +91,7 @@
       "version": "1.0.0",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.1",
+      "minAppVersion": "1.0.7",
       "mark": "IB",
       "tags": [
         "token"
@@ -111,7 +111,7 @@
       "version": "1.0.3",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.4",
+      "minAppVersion": "1.0.7",
       "mark": "SBA",
       "tags": [
         "account"
@@ -131,7 +131,7 @@
       "version": "1.0.2",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.1",
+      "minAppVersion": "1.0.7",
       "mark": "SBA",
       "tags": [
         "token"
