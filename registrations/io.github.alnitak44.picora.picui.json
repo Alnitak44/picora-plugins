@@ -1,0 +1,12 @@
+{
+  "id": "io.github.alnitak44.picora.picui",
+  "releaseRepository": "Alnitak44/picora-plugin-picui",
+  "minAppVersion": "1.0.1",
+  "approvedPermissions": {
+    "network": ["picui.cn"],
+    "readSelectedFile": true,
+    "allowInsecureHttp": false,
+    "deleteUploadedFile": false
+  },
+  "assetPrefix": "picui-"
+}
