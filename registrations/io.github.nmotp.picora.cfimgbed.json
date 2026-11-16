@@ -1,7 +1,7 @@
 {
   "id": "io.github.nmotp.picora.cfimgbed",
   "releaseRepository": "NMOTP/picora-plugin-cfimgbed",
-  "minAppVersion": "1.0.7",
+  "minAppVersion": "1.0.8",
   "approvedPermissions": {
     "network": ["config.baseUrl"],
     "readSelectedFile": true,

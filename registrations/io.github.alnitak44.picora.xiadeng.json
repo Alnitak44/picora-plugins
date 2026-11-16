@@ -1,7 +1,7 @@
 {
   "id": "io.github.alnitak44.picora.xiadeng",
   "releaseRepository": "Alnitak44/picora-plugin-xiadeng",
-  "minAppVersion": "1.0.7",
+  "minAppVersion": "1.0.8",
   "approvedPermissions": {
     "network": ["ai01.teleapi.top"],
     "readSelectedFile": true,

@@ -2,7 +2,7 @@
   "id": "io.github.alnitak44.picora.easyimages2",
   "releaseRepository": "Alnitak44/picora-plugin-easyimages",
   "assetPrefix": "easyimages2-",
-  "minAppVersion": "1.0.7",
+  "minAppVersion": "1.0.8",
   "approvedPermissions": {
     "network": ["config.baseUrl"],
     "readSelectedFile": true,
