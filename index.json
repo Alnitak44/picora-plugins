@@ -28,7 +28,7 @@
       "version": "1.1.0",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.7",
+      "minAppVersion": "1.0.8",
       "mark": "EI",
       "tags": [
         "token",
@@ -68,7 +68,7 @@
       "version": "1.1.0",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.7",
+      "minAppVersion": "1.0.8",
       "mark": "XD",
       "tags": [
         "token"
@@ -88,7 +88,7 @@
       "version": "1.1.4",
       "runtime": "http-v1",
       "packageVersion": 1,
-      "minAppVersion": "1.0.7",
+      "minAppVersion": "1.0.8",
       "mark": "TG",
       "tags": [
         "custom-url"
@@ -108,7 +108,7 @@
       "version": "1.1.1",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.7",
+      "minAppVersion": "1.0.8",
       "mark": "CF",
       "tags": [
         "token",
@@ -129,7 +129,7 @@
       "version": "1.0.1",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.7",
+      "minAppVersion": "1.0.8",
       "mark": "IB",
       "tags": [
         "token"
@@ -149,7 +149,7 @@
       "version": "1.0.4",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.7",
+      "minAppVersion": "1.0.8",
       "mark": "SBA",
       "tags": [
         "account"
@@ -169,7 +169,7 @@
       "version": "1.0.3",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.7",
+      "minAppVersion": "1.0.8",
       "mark": "SBA",
       "tags": [
         "token"
