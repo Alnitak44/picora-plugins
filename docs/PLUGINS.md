@@ -10,6 +10,7 @@ Picora 原生插件使用 **ZIP 包 + 声明式 HTTP 请求**，不执行脚本�
 - [插件包与元信息](#插件包与元信息)
 - [程序入口与能力声明](#程序入口与能力声明)
 - [配置字段](#配置字段)
+- [多登录方式](#多登录方式)
 - [属性标签](#属性标签)
 - [网络与文件权限](#网络与文件权限)
 - [HTTP 请求与响应](#http-请求与响应)
@@ -34,8 +35,9 @@ Picora 原生插件使用 **ZIP 包 + 声明式 HTTP 请求**，不执行脚本�
 | `http-v2` | `schemaVersion: 2` | `1.0.1` | 前置请求、凭证缓存、业务判断、受控刷新与单张删除 |
 | `http-v2` + `conditional-json-fields` | `schemaVersion: 2` | `1.0.4` | 按配置值选择 JSON 请求字段 |
 | `config[].role` | `schemaVersion: 1 / 2` | `1.0.8` | 从字段语义推导插件属性标签 |
+| `http-v2` + `auth-modes` | `schemaVersion: 2` | `1.1.0` | 同一图床提供多种登录方式 |
 
-`plugin.json` 的 `runtime` 必须与入口程序的 `schemaVersion` 对应。发布到模块仓库时，登记文件的 `minAppVersion` 应覆盖插件使用的全部能力，例如使用 `role` 时不得低于 `1.0.8`；旧版本会因未知字段拒绝安装。插件属性标签由字段的 `role` 推导，登记文件不需要声明。
+`plugin.json` 的 `runtime` 必须与入口程序的 `schemaVersion` 对应。发布到插件仓库时，登记文件的 `minAppVersion` 应覆盖插件使用的全部能力：使用 `role` 时不得低于 `1.0.8`，使用 `authModes` 时不得低于 `1.1.0`；旧版本会因未知字段拒绝安装。插件属性标签由字段的 `role` 推导，登记文件不需要声明。
 
 未知程序字段、不支持的运行时或能力、越权模板引用均会在安装阶段报错，不会忽略关键字段。PicGo 的 Node.js 插件不能直接作为 Picora 原生插件安装。
 
@@ -105,10 +107,11 @@ host.picora-plugin.zip
 | `schemaVersion` | 整数 | 是 | `http-v1` 使用 `1`，`http-v2` 使用 `2` |
 | `permissions` | 对象 | 是 | 声明网络目标与文件权限 |
 | `config` | 数组 | 是 | 用户可填写的配置字段；无需配置时使用 `[]` |
-| `upload` | 对象 | 是 | 上传请求及图片链接解析规则 |
-| `delete` | 对象 | 否 | 单张云端图片的删除请求 |
+| `upload` | 对象 | 是 | 上传请求及图片链接解析规则；使用 `authModes` 时由每种方式分别声明 |
+| `delete` | 对象 | 否 | 单张云端图片的删除请求；可放到 `authModes` 中按方式声明 |
 | `prepare` | 数组 | 否，v2 | 上传前按顺序执行的请求，最多 4 步 |
 | `requires` | 字符串数组 | 否，v2 | 声明依赖的运行时能力；未知能力拒绝安装 |
+| `authModes` | 数组 | 否，v2 | 多登录方式，1–8 项；与 `auth-modes` 能力同时声明 |
 
 ### 能力名称
 
@@ -121,6 +124,7 @@ host.picora-plugin.zip
 | `safe-redirects` | 逐跳校验重定向目标和权限 | `1.0.1` |
 | `scoped-delete` | 绑定原配置及单张图片的删除操作 | `1.0.1` |
 | `conditional-json-fields` | 按文本配置选择前置 JSON 请求的字段；使用时必须声明 | `1.0.4` |
+| `auth-modes` | 同一图床的多种登录方式及各自的请求链 | `1.1.0` |
 
 例如，需要前置认证和条件字段时，在程序根部设置 `"requires": ["prepare", "conditional-json-fields"]`。
 
@@ -139,6 +143,109 @@ host.picora-plugin.zip
 | `options` | 字符串数组 | `select` 必填 | 可选值列表，不能为空 |
 | `role` | 字符串 | 否 | 字段语义，用于生成插件属性标签；未知值会被忽略 |
 
+## 多登录方式
+
+同一图床支持游客、Token、账号密码等多种鉴权方式时，用 `authModes` 合并为一个插件。用户新建配置时先选择登录方式，表单只显示公共字段和该方式的字段。
+
+```json
+{
+  "schemaVersion": 2,
+  "requires": ["auth-modes", "prepare", "credential-cache"],
+  "permissions": {
+    "network": ["api.example.com"],
+    "readSelectedFile": true
+  },
+  "config": [
+    { "key": "baseUrl", "label": "服务地址", "role": "endpoint" }
+  ],
+  "authModes": [
+    {
+      "id": "guest",
+      "label": "游客",
+      "config": [],
+      "upload": {
+        "method": "POST",
+        "url": "https://api.example.com/upload",
+        "body": { "type": "multipart", "fileField": "image" },
+        "response": { "url": "data.url" }
+      }
+    },
+    {
+      "id": "token",
+      "label": "API Token",
+      "config": [
+        { "key": "token", "label": "Token", "type": "secret", "role": "token", "required": true }
+      ],
+      "upload": {
+        "method": "POST",
+        "url": "https://api.example.com/upload",
+        "headers": { "Authorization": "Bearer ${config.token}" },
+        "body": { "type": "multipart", "fileField": "image" },
+        "response": { "url": "data.url" }
+      }
+    },
+    {
+      "id": "password",
+      "label": "账号密码",
+      "config": [
+        { "key": "account", "label": "账号", "role": "account", "required": true },
+        { "key": "password", "label": "密码", "type": "secret", "required": true }
+      ],
+      "prepare": [
+        {
+          "id": "login",
+          "method": "POST",
+          "url": "https://api.example.com/login",
+          "body": {
+            "type": "json",
+            "fields": {
+              "account": "${config.account}",
+              "password": "${config.password}"
+            }
+          },
+          "response": {
+            "success": { "path": "ok", "equals": true },
+            "exports": {
+              "token": { "path": "data.token", "type": "string", "secret": true }
+            }
+          },
+          "cache": { "ttlSeconds": 3600 }
+        }
+      ],
+      "upload": {
+        "method": "POST",
+        "url": "https://api.example.com/upload",
+        "headers": { "Authorization": "Bearer ${steps.login.token}" },
+        "body": { "type": "multipart", "fileField": "image" },
+        "response": { "url": "data.url" }
+      }
+    }
+  ]
+}
+```
+
+| 参数 | 类型 | 必填 | 功能与用法 |
+| --- | --- | --- | --- |
+| `id` | 字符串 | 是 | 方式标识，匹配 `[a-z][a-z0-9-]{0,31}`，在本插件内唯一；发布后保持稳定 |
+| `label` | 字符串 | 是 | 登录方式名称，显示在下拉菜单中，最长 40 字符 |
+| `config` | 数组 | 是 | 该方式独有的字段，最多 20 个；无独有字段时使用 `[]` |
+| `prepare` | 数组 | 否 | 该方式的前置请求，最多 4 步 |
+| `upload` | 对象 | 是 | 该方式的上传请求 |
+| `delete` | 对象 | 否 | 该方式是否支持单张云端图片删除 |
+
+规则：
+
+- 根级 `config` 与 `prepare` 对所有方式生效；方式的 `prepare` 可读取根级前置请求导出的变量。
+- 方式字段的 `key` 不能重复，也不能与根级字段或其他方式的字段重名。
+- 只能读取当前方式的字段和前置步骤；引用其他方式的数据会在安装阶段被拒绝。
+- 客户端保存配置时写入内部字段 `authMode` 记录所选方式，插件不得声明名为 `authMode` 的配置字段。
+- 只校验当前方式必填字段；未选方式的字段不会发送，也不会参与模板替换。
+- 凭证缓存按插件、配置组、完整配置值和方式隔离；切换方式不会复用旧方式的凭证。
+- 方式的 `delete` 独立生效；当前方式未声明 `delete` 时，客户端不提供云端删除。
+- 未声明 `authModes` 的插件保持原有行为，无需修改。
+
+使用 `auth-modes` 会把插件的最低版本要求提到 Picora `1.1.0`。
+
 ## 属性标签
 
 插件在列表里显示的「需认证 / Token / 账号 / 自定义地址 / 云删除 / 测试版」不是单独填写的，而是从配置字段、请求声明和版本号推导出来的：
@@ -148,7 +255,7 @@ host.picora-plugin.zip
 | `role: token` | Token | API Key、AccessKey |
 | `role: account` | 账号 | 用户名、邮箱 |
 | `role: endpoint` | 自定义地址 | 自建服务地址、S3 Endpoint |
-| 声明了 `delete` 请求 | 云删除 | 支持删除已上传到图床的图片 |
+| 根级或任一 `authModes[].delete` | 云删除 | 支持删除已上传到图床的图片 |
 | 版本号带预发布后缀 | 测试版 | 例如 `1.2.0-beta.1` |
 
 ```json
@@ -158,9 +265,9 @@ host.picora-plugin.zip
 ]
 ```
 
-判定规则：存在 `required` 为 `true` 的 `secret` 字段，或存在 `token` / `account` 角色时，显示「需认证」，否则「无需认证」。普通参数（存储桶、路径、开关）不需要 `role`。
+判定规则：存在 `required` 为 `true` 的 `secret` 字段，或存在 `token` / `account` 角色时，显示「需认证」，否则「无需认证」；多登录方式会合并全部方式的字段共同判断。普通参数（存储桶、路径、开关）不需要 `role`。
 
-「云删除」不来自 `role`，而来自程序是否声明了 `delete` 请求：有 `delete` 就显示，没有就不显示，和相册里的「删除云端图片」按钮使用同一份依据，不会出现“标签说能删、按钮却不在”的情况。
+「云删除」不来自 `role`，而来自程序是否声明了 `delete` 请求：根级或任一登录方式有 `delete` 就显示。相册里的「删除云端图片」按钮还会检查当前配置的登录方式是否支持删除。
 
 「测试版」同样自动判断：`plugin.json` 的 `version` 带预发布后缀（如 `1.2.0-beta.1`）就显示，发布正式版本后自动消失；构建元数据 `1.2.0+build.5` 不算测试版。
 
@@ -433,7 +540,7 @@ v2 删除由用户在图片详情中单独确认，或在已开启同步删除�
 
 同 ID 更新会替换程序、教程和资源，保留配置与启用状态。允许同版本重装，拒绝降级；插件版本遵循 SemVer，`id` 和 `config.key` 应保持稳定。更新后，云端删除权限需要用户重新开启。
 
-`role` 只影响列表展示，不改变表单、请求或权限，因此调整它不需要重新审核权限；但首次使用 `role` 需要把 `minAppVersion` 提到 `1.0.8`。
+`role` 只影响列表展示，不改变表单、请求或权限，因此调整它不需要重新审核权限；但首次使用 `role` 需要把 `minAppVersion` 提到 `1.0.8`，首次使用 `authModes` 需要提到 `1.1.0`。
 
 ### 资源限制
 
@@ -456,7 +563,7 @@ v2 删除由用户在图片详情中单独确认，或在已开启同步删除�
 
 ### 目录审核边界
 
-模块仓库会在每次构建时重新校验包结构与权限，但名称、简介、作者、图标和 `readme.md` 会随新版本自动同步，不需要重新审核。因此目录额外做三项检查：名称不得与已收录插件重复或近似、文案不得含引流诈骗类用语、`readme.md` 与 `homepage` 的链接只允许 GitHub 平台、插件自身已批准的请求主机或登记文件 `allowedLinks` 中的域名。`network` 含 `*` 的插件会在构建时告警，这类插件可以改写请求目标，安装前应确认来源。
+插件仓库会在每次构建时重新校验包结构与权限，但名称、简介、作者、图标和 `readme.md` 会随新版本自动同步，不需要重新审核。因此目录额外做两项检查：文案不得含引流诈骗类用语、`readme.md` 与 `homepage` 的链接只允许 GitHub 平台、插件自身已批准的请求主机或登记文件 `allowedLinks` 中的域名。插件名称在首次收录时由维护者人工审核；`network` 含 `*` 的插件会在构建时告警，这类插件可以改写请求目标，安装前应确认来源。
 
 ## 打包与发布
 
@@ -466,6 +573,6 @@ v2 删除由用户在图片详情中单独确认，或在已开启同步删除�
 .\tools\package-plugin.ps1 -SourceDirectory '.\plugins\my-host' -OutputPath '.\releases\plugins\my-host-1.0.0.picora-plugin.zip'
 ```
 
-用户可从模块仓库、本地 ZIP 或下载 URL 安装插件；错误详情位于“设置 → 诊断日志”。
+用户可从插件仓库、本地 ZIP 或下载 URL 安装插件；错误详情位于“设置 → 诊断日志”。
 
 投稿登记与发布更新见[插件提交流程](插件提交流程.md)。

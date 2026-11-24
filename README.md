@@ -1,4 +1,4 @@
-# Picora 模块仓库
+# Picora 插件仓库
 
 [Picora](https://github.com/Alnitak44/Picora) 的在线插件目录。客户端读取自动生成的 [index.json](index.json)，从插件作者的 GitHub Release 下载 ZIP，并校验插件身份、版本、大小和 SHA-256。
 

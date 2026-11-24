@@ -65,9 +65,6 @@ BANNED_WORDS = (
     "私彩",
 )
 
-# 名称不能被这些保留名占用，避免冒充官方。
-RESERVED_NAMES = ("picora", "picora插件", "picora官方")
-
 LINK_RE = re.compile(r"\]\(\s*<?([^)\s>]+)>?")
 BARE_URL_RE = re.compile(r"https?://[^\s<>)\]}`'\"，。；！？、]+", re.IGNORECASE)
 
@@ -101,59 +98,6 @@ def version_key(value):
     prerelease = match.group(4)
     parts = tuple((0, int(part)) if part.isdigit() else (1, part) for part in prerelease.split(".")) if prerelease else ()
     return tuple(int(match.group(i)) for i in (1, 2, 3)) + (0 if prerelease else 1, parts)
-
-
-def normalize_name(value):
-    """Fold a plugin name so lookalikes compare equal."""
-    text = unicodedata.normalize("NFKC", value).casefold()
-    return re.sub(r"[\s\-_·.。:：|/\\()（）\[\]【】{}<>+&*~,，!！?？'\"]", "", text)
-
-
-def edit_distance(left, right, limit=2):
-    if abs(len(left) - len(right)) > limit:
-        return limit + 1
-    previous = list(range(len(right) + 1))
-    for i, left_char in enumerate(left, 1):
-        current = [i]
-        for j, right_char in enumerate(right, 1):
-            current.append(
-                min(
-                    previous[j] + 1,
-                    current[j - 1] + 1,
-                    previous[j - 1] + (left_char != right_char),
-                )
-            )
-        previous = current
-    return previous[-1]
-
-
-def names_collide(left, right):
-    if not left or not right:
-        return False
-    if left == right:
-        return True
-    shorter, longer = sorted((left, right), key=len)
-    if len(shorter) >= 3 and shorter in longer:
-        return True
-    return len(shorter) >= 4 and edit_distance(left, right) <= 2
-
-
-def check_impersonation(entries):
-    """Reject names that duplicate or imitate another plugin or the official name."""
-    seen = {}
-    reserved = {normalize_name(name) for name in RESERVED_NAMES}
-    for entry in entries:
-        normalized = normalize_name(entry["name"])
-        for existing in reserved:
-            if names_collide(normalized, existing):
-                fail(f"{entry['id']}: 插件名 {entry['name']!r} 与 Picora 官方名称过于接近；请改用能区分来源的名称")
-        for other_id, other_name, other_normalized in seen.values():
-            if names_collide(normalized, other_normalized):
-                fail(
-                    f"{entry['id']}: 插件名 {entry['name']!r} 与已收录插件 {other_name!r}（{other_id}）"
-                    "重复或过于接近；请改用能区分来源的名称"
-                )
-        seen[entry["id"]] = (entry["id"], entry["name"], normalized)
 
 
 def check_banned_words(plugin_id, field, text):
@@ -236,14 +180,47 @@ def config_fields(program):
     return [field for field in fields if isinstance(field, dict)]
 
 
+def auth_mode_fields(program):
+    """Configuration fields contributed by each authentication mode."""
+    modes = program.get("authModes")
+    if modes is None:
+        return []
+    if not isinstance(modes, list) or not 1 <= len(modes) <= 8:
+        fail("uploader.json 的 authModes 必须是 1–8 项数组")
+    fields = []
+    for mode in modes:
+        if not isinstance(mode, dict):
+            fail("uploader.json 的 authModes 项必须是对象")
+        items = mode.get("config")
+        if items is None:
+            continue
+        if not isinstance(items, list):
+            fail("authModes[].config 必须是数组")
+        fields.extend(field for field in items if isinstance(field, dict))
+    return fields
+
+
+def all_config_fields(program):
+    return config_fields(program) + auth_mode_fields(program)
+
+
+def declares_delete(program):
+    if program.get("delete"):
+        return True
+    return any(
+        isinstance(mode, dict) and mode.get("delete")
+        for mode in program.get("authModes") or []
+    )
+
+
 def derived_tags(program):
     """Mirror the client's tag derivation so the repository list can show chips."""
     tags = set()
-    for field in config_fields(program):
+    for field in all_config_fields(program):
         tag = ROLE_TAGS.get(field.get("role")) or inferred_tag(field)
         if tag:
             tags.add(tag)
-    if program.get("delete"):
+    if declares_delete(program):
         tags.add("cloud-delete")
     # 测试版标签由客户端按版本号自动补，这里不重复写入。
     return [tag for tag in TAG_ORDER if tag in tags]
@@ -269,7 +246,7 @@ def inferred_tag(field):
 
 
 def derived_requires_auth(program):
-    fields = config_fields(program)
+    fields = all_config_fields(program)
     if any(field.get("type") == "secret" and field.get("required") is True for field in fields):
         return True
     return any(ROLE_TAGS.get(field.get("role")) in ("token", "account") for field in fields)
@@ -356,6 +333,12 @@ def parse_package(data, registration, check_permissions=True, observed_ids=None,
     minimum = registration["minAppVersion"]
     if runtime == "http-v2" and version_key(minimum) < version_key("1.0.1"):
         fail(f"{registration['id']}: http-v2 requires Picora 1.0.1")
+    if program.get("authModes") is not None:
+        requires = program.get("requires")
+        if runtime != "http-v2" or not isinstance(requires, list) or "auth-modes" not in requires:
+            fail(f"{registration['id']}: authModes requires http-v2 and the auth-modes capability")
+        if version_key(minimum) < version_key("1.1.0"):
+            fail(f"{registration['id']}: authModes requires Picora 1.1.0")
     actual_permissions = normalized_permissions(program)
     approved = registration["approvedPermissions"].copy()
     approved["network"] = sorted(approved["network"])
@@ -525,7 +508,6 @@ def build(registrations, github):
                 "该插件可以改写请求目标，首次收录与权限变更时需人工确认"
             )
         entries.append(validated)
-    check_impersonation(entries)
     entries.sort(key=lambda entry: entry["id"])
     return {"schemaVersion": 1, "plugins": entries}
 

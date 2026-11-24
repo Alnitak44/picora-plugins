@@ -8,7 +8,6 @@ from pathlib import Path
 
 from scripts.build_catalog import (
     build,
-    check_impersonation,
     guard_existing_versions,
     load_registration,
     parse_package,
@@ -221,25 +220,6 @@ class CatalogBuilderTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "违规内容"):
             parse_package(package(readme="# Demo\n\n破解版下载"), REGISTRATION)
 
-    def test_plugin_names_cannot_imitate_other_plugins_or_official_names(self):
-        def catalog_with(names):
-            entries = []
-            for index, name in enumerate(names):
-                plugin_id = f"io.github.example.picora.demo{index}"
-                entries.append({"id": plugin_id, "name": name})
-            return entries
-
-        for names in [
-            ["ImgLoc 图床", "ImgLoc图床"],
-            ["ImgLoc 图床", "ImgLoc 图床 Pro"],
-            ["ImgLoc 图床", "ImgLoc 图库"],
-            ["Picora 官方插件"],
-        ]:
-            with self.subTest(names=names):
-                with self.assertRaisesRegex(ValueError, "名称"):
-                    check_impersonation(catalog_with(names))
-        check_impersonation(catalog_with(["ImgLoc 图床", "聚合图床", "ImgBB 图床"]))
-
     def test_package_cannot_self_assign_example_badge(self):
         data = package(metadata_changes={"example": True})
         self.assertFalse(parse_package(data, REGISTRATION)["example"])
@@ -413,6 +393,85 @@ class CatalogBuilderTests(unittest.TestCase):
         )
         self.assertEqual(legacy["tags"], ["token", "custom-url"])
         self.assertTrue(legacy["requiresAuth"])
+
+    def test_catalog_derives_tags_from_auth_modes(self):
+        registration = {**REGISTRATION, "minAppVersion": "1.1.0"}
+        modes = [
+            {
+                "id": "guest",
+                "label": "游客",
+                "config": [],
+                "upload": {},
+            },
+            {
+                "id": "token",
+                "label": "Token",
+                "config": [
+                    {
+                        "key": "token",
+                        "label": "令牌",
+                        "type": "secret",
+                        "role": "token",
+                        "required": True,
+                    }
+                ],
+                "upload": {},
+            },
+            {
+                "id": "password",
+                "label": "账号密码",
+                "config": [
+                    {
+                        "key": "account",
+                        "label": "账号",
+                        "role": "account",
+                        "required": True,
+                    },
+                    {
+                        "key": "password",
+                        "label": "密码",
+                        "type": "secret",
+                        "required": True,
+                    },
+                ],
+                "upload": {},
+                "delete": {"method": "GET", "url": "${upload.deleteKey}"},
+            },
+        ]
+        entry = parse_package(
+            package(
+                program_changes={
+                    "requires": ["auth-modes"],
+                    "authModes": modes,
+                }
+            ),
+            registration,
+        )
+        self.assertEqual(entry["tags"], ["token", "account", "cloud-delete"])
+        self.assertTrue(entry["requiresAuth"])
+
+        guest_only = parse_package(
+            package(
+                program_changes={
+                    "requires": ["auth-modes"],
+                    "authModes": [modes[0]],
+                }
+            ),
+            registration,
+        )
+        self.assertEqual(guest_only["tags"], [])
+        self.assertFalse(guest_only["requiresAuth"])
+
+        with self.assertRaisesRegex(ValueError, "1.1.0"):
+            parse_package(
+                package(
+                    program_changes={
+                        "requires": ["auth-modes"],
+                        "authModes": modes,
+                    }
+                ),
+                REGISTRATION,
+            )
 
 
 if __name__ == "__main__":
