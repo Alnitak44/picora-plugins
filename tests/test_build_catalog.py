@@ -85,6 +85,10 @@ class FakeGitHub:
     def asset(self, url):
         return self.assets[url]
 
+    def repo_info(self, repository):
+        assert repository == REPOSITORY
+        return {"id": 1, "full_name": REPOSITORY}
+
 
 class DeletedRepositoryGitHub:
     """Releases endpoint answers 404; the second confirmation decides the outcome."""
@@ -531,6 +535,9 @@ class CatalogBuilderTests(unittest.TestCase):
             def asset(self, url):
                 return self.assets[url]
 
+            def repo_info(self, repository):
+                return {"id": sum(map(ord, repository)), "full_name": repository}
+
         github = TwoPluginGitHub()
         older_id, older_repository = github.add("aaa", "2026-01-01T00:00:00Z")
         newer_id, newer_repository = github.add("zzz", "2026-06-01T00:00:00Z")
@@ -573,6 +580,72 @@ class CatalogBuilderTests(unittest.TestCase):
             path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
             with self.assertRaises(urllib.error.HTTPError):
                 build(Path(temp), github, [])
+
+
+    def test_catalog_records_repository_id(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            catalog = build(Path(temp), FakeGitHub(["1.0.0"]))
+        self.assertEqual(catalog["plugins"][0]["repositoryId"], 1)
+
+    def test_same_name_repository_replacement_is_rejected(self):
+        class MovedGitHub(FakeGitHub):
+            def repo_info(self, repository):
+                return {"id": 2, "full_name": REPOSITORY}
+
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "仓库 ID"):
+                build(Path(temp), MovedGitHub(["1.0.0"]), [], {PLUGIN_ID: 1})
+
+    def test_renamed_repository_follows_a_bound_repository_id(self):
+        canonical = "example/picora-plugin-renamed"
+        url = f"https://github.com/{canonical}/releases/download/v1.0.0/demo-1.0.0.picora-plugin.zip"
+        data = package(metadata_changes={"repository": f"https://github.com/{canonical}"})
+
+        class RenamedGitHub:
+            def repo_info(self, repository):
+                assert repository == REPOSITORY
+                return {"id": 7, "full_name": canonical}
+
+            def releases(self, repository):
+                return [
+                    {
+                        "draft": False,
+                        "prerelease": False,
+                        "assets": [
+                            {"name": "demo-1.0.0.picora-plugin.zip", "browser_download_url": url}
+                        ],
+                    }
+                ]
+
+            def asset(self, target):
+                assert target == url
+                return data
+
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            with redirect_stderr(io.StringIO()) as warnings:
+                catalog = build(Path(temp), RenamedGitHub(), [], {PLUGIN_ID: 7})
+        self.assertEqual(catalog["plugins"][0]["repositoryId"], 7)
+        self.assertIn("已改名", warnings.getvalue())
+
+    def test_first_time_binding_requires_a_matching_repository_name(self):
+        class RenamedGitHub:
+            def repo_info(self, repository):
+                return {"id": 7, "full_name": "example/picora-plugin-renamed"}
+
+            def releases(self, repository):
+                return []
+
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "已改名"):
+                build(Path(temp), RenamedGitHub(), [], {})
 
 
 if __name__ == "__main__":

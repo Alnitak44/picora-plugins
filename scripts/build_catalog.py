@@ -290,7 +290,15 @@ def load_registration(path):
     return item
 
 
-def parse_package(data, registration, check_permissions=True, observed_ids=None, emit_warnings=True, check_mark=True):
+def parse_package(
+    data,
+    registration,
+    check_permissions=True,
+    observed_ids=None,
+    emit_warnings=True,
+    check_mark=True,
+    canonical_repository=None,
+):
     if len(data) > MAX_ZIP:
         fail("ZIP exceeds 10 MB")
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -372,7 +380,10 @@ def parse_package(data, registration, check_permissions=True, observed_ids=None,
     parsed_repo = urllib.parse.urlparse(repository) if isinstance(repository, str) else None
     if not parsed_repo or parsed_repo.scheme != "https" or parsed_repo.netloc != "github.com":
         fail(f"{registration['id']}: plugin.json 的 repository={repository!r}；应为 https://github.com/{registration['releaseRepository']}")
-    if parsed_repo.path.rstrip("/").lower() != f"/{registration['releaseRepository'].lower()}":
+    allowed_paths = {f"/{registration['releaseRepository']}".casefold()}
+    if canonical_repository:
+        allowed_paths.add(f"/{canonical_repository}".casefold())
+    if parsed_repo.path.rstrip("/").casefold() not in allowed_paths:
         fail(
             f"{registration['id']}: plugin.json 的 repository={repository}，"
             f"但登记文件 releaseRepository={registration['releaseRepository']}；"
@@ -431,25 +442,34 @@ class GitHub:
         return data
 
 
-    def repository_exists(self, repository):
-        """Confirm with a second endpoint that a 404 really means the repo is gone."""
+    def repo_info(self, repository):
+        """Return GitHub's canonical repository record; None once the repo is gone."""
         url = f"https://api.github.com/repos/{repository}"
         headers = {"Accept": "application/vnd.github+json", "User-Agent": "picora-catalog"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         try:
-            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30):
-                return True
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as response:
+                data = json.load(response)
         except urllib.error.HTTPError as error:
             if error.code == 404:
-                return False
+                return None
             # 451（合规封禁）、403（限流）等都不是作者删库，交给人工处理。
             raise
+        if not isinstance(data, dict) or not isinstance(data.get("id"), int) or not isinstance(data.get("full_name"), str):
+            fail(f"{repository}: GitHub 返回的仓库信息不完整")
+        return data
+
+    def repository_exists(self, repository):
+        """Confirm with a second endpoint that a 404 really means the repo is gone."""
+        return self.repo_info(repository) is not None
 
 
-def build(registrations, github, retired=None):
+def build(registrations, github, retired=None, bindings=None):
     if retired is None:
         retired = []
+    if bindings is None:
+        bindings = {}
     entries = []
     seen_ids = set()
     if not registrations.is_dir():
@@ -478,6 +498,28 @@ def build(registrations, github, retired=None):
             )
             retired.append(path)
             continue
+        info = github.repo_info(repository)
+        if info is None:
+            fail(f"{registration['id']}: 仓库 {repository} 在读取 Release 后消失，请稍后重试")
+        canonical = info["full_name"]
+        repository_id = info["id"]
+        bound_id = bindings.get(registration["id"])
+        if bound_id is None:
+            if canonical.casefold() != repository.casefold():
+                fail(
+                    f"{registration['id']}: 仓库已改名为 {canonical}；"
+                    f"请先把登记文件的 releaseRepository 改为 {canonical} 再收录"
+                )
+        elif bound_id != repository_id:
+            fail(
+                f"{registration['id']}: 仓库 {repository} 的 GitHub 仓库 ID 已从 {bound_id} 变为 "
+                f"{repository_id}，疑似同名仓库被替换；请人工确认后再更新 index.json"
+            )
+        if canonical.casefold() != repository.casefold():
+            warn(
+                f"{registration['id']}: 仓库已改名为 {canonical}，已按新名称校验附件与 plugin.json；"
+                "建议更新登记文件与 plugin.json"
+            )
         for release in releases:
             if release.get("draft") or release.get("prerelease"):
                 continue
@@ -490,14 +532,18 @@ def build(registrations, github, retired=None):
                 if not name.startswith(registration.get("assetPrefix", "")) or suffix is None:
                     continue
                 url = asset.get("browser_download_url", "")
-                expected_prefix = f"https://github.com/{registration['releaseRepository']}/releases/download/"
-                if not url.lower().startswith(expected_prefix.lower()):
+                expected_prefix = f"https://github.com/{canonical}/releases/download/"
+                declared_prefix = f"https://github.com/{repository}/releases/download/"
+                if not url.lower().startswith(expected_prefix.lower()) and not url.lower().startswith(
+                    declared_prefix.lower()
+                ):
                     fail(f"{registration['id']}: asset is not in its release repository")
                 data = github.asset(url)
                 try:
                     entry = parse_package(
                         data, registration, check_permissions=False,
                         observed_ids=observed_ids, emit_warnings=False, check_mark=False,
+                        canonical_repository=canonical,
                     )
                 except (ValueError, zipfile.BadZipFile) as error:
                     fail(f"{registration['id']}: Release 附件 {name} 校验失败：{error}")
@@ -531,8 +577,9 @@ def build(registrations, github, retired=None):
                 f"{registration['id']}: Release 附件 {latest_name} 命名不规范，但 ZIP 校验通过，已自动收录；"
                 f"以后建议使用以 {PACKAGE_SUFFIX} 结尾的文件名"
             )
-        validated = parse_package(latest_data, registration)
+        validated = parse_package(latest_data, registration, canonical_repository=canonical)
         validated["downloadUrl"] = latest["downloadUrl"]
+        validated["repositoryId"] = repository_id
         if "*" in registration["approvedPermissions"]["network"]:
             warn(
                 f"{registration['id']}: approvedPermissions 允许任意主机（*）；"
@@ -588,16 +635,22 @@ def main():
     parser.add_argument("--check", action="store_true", help="validate without writing files")
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
+    index_path = root / "index.json"
+    readme_path = root / "README.md"
+    previous = {"schemaVersion": 1, "plugins": []}
+    if index_path.exists():
+        previous = json.loads(index_path.read_text(encoding="utf-8"))
+    bindings = {
+        item["id"]: item["repositoryId"]
+        for item in previous.get("plugins", [])
+        if isinstance(item, dict) and isinstance(item.get("repositoryId"), int)
+    }
     retired = []
-    catalog = build(root / "registrations", GitHub(os.environ.get("GITHUB_TOKEN")), retired)
+    catalog = build(root / "registrations", GitHub(os.environ.get("GITHUB_TOKEN")), retired, bindings)
     rendered = json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
     if len(rendered.encode("utf-8")) > 1024 * 1024:
         fail("generated index exceeds the client's 1 MB limit")
-    index_path = root / "index.json"
-    readme_path = root / "README.md"
-    if index_path.exists():
-        previous = json.loads(index_path.read_text(encoding="utf-8"))
-        guard_existing_versions(previous, catalog)
+    guard_existing_versions(previous, catalog)
     readme = update_readme(readme_path.read_text(encoding="utf-8"), catalog)
     if args.check:
         print(rendered)
