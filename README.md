@@ -12,6 +12,7 @@
 | [PICUI 图床](https://github.com/Alnitak44/picora-plugin-picui) | Alnitak44 | 1.0.1 | 支持游客上传，也可使用个人 Token 上传到 PICUI 账户。 |
 | [虾蹬公益图床](https://github.com/Alnitak44/picora-plugin-xiadeng) | Alnitak44 & DeepSeek | 1.1.0 | 连接 ai01.teleapi.top 虾蹬公益图床，使用 Linux DO 登录后的会话 Cookie 上传。 |
 | [Telegraph-Image](https://github.com/Alnitak44/picora-plugin-telegraph-image) | Alnitak44 | 1.1.4 | 连接 cf-pages/Telegraph-Image 自建图床 |
+| [蜜蜂图床](https://github.com/ENDDREAM-ZM/picora-plugin-beeimg) | ENDDREAM | 1.1.0 | 蜜蜂图床上传：默认游客免登录，可选填写访问令牌永久保存。 |
 | [CloudFlare ImgBed](https://github.com/NMOTP/picora-plugin-cfimgbed) | NMOTP | 1.1.1 | 连接自建的 CloudFlare ImgBed 图床，支持 API Token 或上传密码（authCode）鉴权。 |
 | [ImgBB 图床](https://github.com/ruzmariN/picora-plugin-imgbb) | 迷迭香 | 1.0.1 | 使用 ImgBB API Key 上传图片并获取直链。 |
 | [聚合图床（账号登录版）](https://github.com/ruzmariN/picora-plugin-superbed-account) | 迷迭香、Alnitak44 | 1.0.4 | 使用聚合图床邮箱或用户名及密码上传图片，无需 API Key。 |

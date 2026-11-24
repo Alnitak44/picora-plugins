@@ -100,6 +100,26 @@
       "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.4/telegraph-image-1.1.4.picora-plugin.zip"
     },
     {
+      "id": "io.github.enddream-zm.picora.beeimg",
+      "name": "蜜蜂图床",
+      "description": "蜜蜂图床上传：默认游客免登录，可选填写访问令牌永久保存。",
+      "author": "ENDDREAM",
+      "repository": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg",
+      "version": "1.1.0",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.1.0",
+      "mark": "蜂",
+      "tags": [
+        "token"
+      ],
+      "requiresAuth": true,
+      "example": false,
+      "sha256": "82925026556579b2b8b11fc37fa24ce8be9afd2e41d8446789c55269dd310fa5",
+      "size": 4088,
+      "downloadUrl": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg/releases/download/1.1.0/beeimg-1.1.0.picora-plugin.zip"
+    },
+    {
       "id": "io.github.nmotp.picora.cfimgbed",
       "name": "CloudFlare ImgBed",
       "description": "连接自建的 CloudFlare ImgBed 图床，支持 API Token 或上传密码（authCode）鉴权。",
