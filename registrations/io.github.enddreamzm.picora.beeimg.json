@@ -1,0 +1,13 @@
+{
+  "id": "io.github.enddreamzm.picora.beeimg",
+  "releaseRepository": "ENDDREAM-ZM/picora-plugin-beeimg",
+  "minAppVersion": "1.1.0",
+  "approvedPermissions": {
+    "network": [
+      "www.beeimg.cn"
+    ],
+    "readSelectedFile": true,
+    "allowInsecureHttp": false,
+    "deleteUploadedFile": false
+  }
+}
