@@ -19,7 +19,8 @@
       "example": false,
       "sha256": "82925026556579b2b8b11fc37fa24ce8be9afd2e41d8446789c55269dd310fa5",
       "size": 4088,
-      "downloadUrl": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg/releases/download/1.1.0/beeimg-1.1.0.picora-plugin.zip"
+      "downloadUrl": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg/releases/download/1.1.0/beeimg-1.1.0.picora-plugin.zip",
+      "repositoryId": 1469836945
     },
     {
       "id": "io.github.alnitak44.picora.xiadeng",
@@ -39,7 +40,8 @@
       "example": false,
       "sha256": "3cd36862300603849b675c326cec093ab991a31bdc303e446cddb6884f0044d9",
       "size": 5431,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-xiadeng/releases/download/v1.1.0/xiadeng-1.1.0.picora-plugin.zip"
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-xiadeng/releases/download/v1.1.0/xiadeng-1.1.0.picora-plugin.zip",
+      "repositoryId": 1458607908
     },
     {
       "id": "io.github.alnitak44.picora.picui",
@@ -57,7 +59,8 @@
       "example": false,
       "sha256": "1b1419e5906b058ee7da944a5b1c62a1d7fb8e39ec9e9a72d3e200c98ff7875f",
       "size": 15073,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-picui/releases/download/v1.0.1/picui-1.0.1.picora-plugin.zip"
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-picui/releases/download/v1.0.1/picui-1.0.1.picora-plugin.zip",
+      "repositoryId": 1458607854
     },
     {
       "id": "io.github.ruzmarin.picora.superbed-api",
@@ -77,7 +80,8 @@
       "example": false,
       "sha256": "e09c2b76b0e10ec2a6e06fc474567ca4f0fc0c236660445bc45057ab00bb440e",
       "size": 16225,
-      "downloadUrl": "https://github.com/ruzmariN/picora-plugins-superbed-api/releases/download/v1.0.3/superbed-api-1.0.3.picora-plugin.zip"
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugins-superbed-api/releases/download/v1.0.3/superbed-api-1.0.3.picora-plugin.zip",
+      "repositoryId": 1415010250
     },
     {
       "id": "io.github.ruzmarin.picora.imgbb",
@@ -97,7 +101,8 @@
       "example": false,
       "sha256": "23c12a4bd0a467c707f2c74be5c4532d9c5642b058d2a6800a727353667c4686",
       "size": 3170,
-      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-imgbb/releases/download/v1.0.1/imgbb-1.0.1.picora-plugin.zip"
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-imgbb/releases/download/v1.0.1/imgbb-1.0.1.picora-plugin.zip",
+      "repositoryId": 1413901024
     },
     {
       "id": "io.github.alnitak44.telegraph-image",
@@ -117,7 +122,8 @@
       "example": true,
       "sha256": "59267b5676bbaa094659e967a8bc305cda2c0aed8a50da983265178be31b23d1",
       "size": 3850,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.4/telegraph-image-1.1.4.picora-plugin.zip"
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.4/telegraph-image-1.1.4.picora-plugin.zip",
+      "repositoryId": 1414987522
     },
     {
       "id": "io.github.alnitak44.imgloc",
@@ -135,7 +141,8 @@
       "example": false,
       "sha256": "179cb8b3177e3c089d7301621062bf573e7ef06d89d5fbd21cbe78599d06ee1e",
       "size": 17084,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.1/imgloc-1.1.1.picora-plugin.zip"
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.1/imgloc-1.1.1.picora-plugin.zip",
+      "repositoryId": 1414420666
     },
     {
       "id": "io.github.nmotp.picora.cfimgbed",
@@ -156,7 +163,8 @@
       "example": false,
       "sha256": "f9c4c96b2c122cef3b83b0286b369cf4681d103ed49417e4b75c78ef96217664",
       "size": 5921,
-      "downloadUrl": "https://github.com/NMOTP/picora-plugin-cfimgbed/releases/download/v1.1.1/cfimgbed-1.1.1.picora-plugin.zip"
+      "downloadUrl": "https://github.com/NMOTP/picora-plugin-cfimgbed/releases/download/v1.1.1/cfimgbed-1.1.1.picora-plugin.zip",
+      "repositoryId": 1456672030
     },
     {
       "id": "io.github.alnitak44.picora.easyimages2",
@@ -178,7 +186,8 @@
       "example": false,
       "sha256": "e098562c78638ca653d101761e2388535a79e650b28dae3bfc8d22d6d3dcc8ce",
       "size": 5728,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-easyimages/releases/download/v1.1.0/easyimages2-1.1.0.picora-plugin.zip"
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-easyimages/releases/download/v1.1.0/easyimages2-1.1.0.picora-plugin.zip",
+      "repositoryId": 1454125222
     }
   ]
 }
