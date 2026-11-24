@@ -1,0 +1,15 @@
+{
+  "id": "io.github.alnitak44.picora.superbed",
+  "releaseRepository": "Alnitak44/picora-plugin-superbed",
+  "assetPrefix": "superbed-",
+  "minAppVersion": "1.1.0",
+  "approvedPermissions": {
+    "network": [
+      "www.superbed.cn",
+      "api.superbed.cn"
+    ],
+    "readSelectedFile": true,
+    "allowInsecureHttp": false,
+    "deleteUploadedFile": false
+  }
+}
