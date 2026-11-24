@@ -2,6 +2,7 @@ import io
 import json
 import tempfile
 import unittest
+import urllib.error
 import zipfile
 from contextlib import redirect_stderr
 from pathlib import Path
@@ -83,6 +84,23 @@ class FakeGitHub:
 
     def asset(self, url):
         return self.assets[url]
+
+
+class DeletedRepositoryGitHub:
+    """Releases endpoint answers 404; the second confirmation decides the outcome."""
+
+    def __init__(self, repository_exists):
+        self.exists = repository_exists
+        self.confirmations = []
+
+    def releases(self, repository):
+        raise urllib.error.HTTPError(
+            f"https://api.github.com/repos/{repository}/releases", 404, "Not Found", None, None
+        )
+
+    def repository_exists(self, repository):
+        self.confirmations.append(repository)
+        return self.exists
 
 
 class CatalogBuilderTests(unittest.TestCase):
@@ -532,6 +550,29 @@ class CatalogBuilderTests(unittest.TestCase):
             [entry["id"] for entry in catalog["plugins"]],
             [newer_id, older_id],
         )
+
+
+    def test_deleted_repository_retires_plugin(self):
+        github = DeletedRepositoryGitHub(repository_exists=False)
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            registrations = Path(temp)
+            path = registrations / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            retired = []
+            with redirect_stderr(io.StringIO()) as warnings:
+                catalog = build(registrations, github, retired)
+        self.assertEqual(catalog, {"schemaVersion": 1, "plugins": []})
+        self.assertEqual([item.name for item in retired], [f"{PLUGIN_ID}.json"])
+        self.assertEqual(github.confirmations, [REPOSITORY])
+        self.assertIn("已不存在", warnings.getvalue())
+
+    def test_releases_404_with_live_repository_is_not_a_retirement(self):
+        github = DeletedRepositoryGitHub(repository_exists=True)
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            path = Path(temp) / f"{PLUGIN_ID}.json"
+            path.write_text(json.dumps(REGISTRATION), encoding="utf-8")
+            with self.assertRaises(urllib.error.HTTPError):
+                build(Path(temp), github, [])
 
 
 if __name__ == "__main__":

@@ -431,7 +431,25 @@ class GitHub:
         return data
 
 
-def build(registrations, github):
+    def repository_exists(self, repository):
+        """Confirm with a second endpoint that a 404 really means the repo is gone."""
+        url = f"https://api.github.com/repos/{repository}"
+        headers = {"Accept": "application/vnd.github+json", "User-Agent": "picora-catalog"}
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30):
+                return True
+        except urllib.error.HTTPError as error:
+            if error.code == 404:
+                return False
+            # 451（合规封禁）、403（限流）等都不是作者删库，交给人工处理。
+            raise
+
+
+def build(registrations, github, retired=None):
+    if retired is None:
+        retired = []
     entries = []
     seen_ids = set()
     if not registrations.is_dir():
@@ -448,7 +466,19 @@ def build(registrations, github):
         observed_ids = []
         published_releases = 0
         asset_names = []
-        for release in github.releases(registration["releaseRepository"]):
+        repository = registration["releaseRepository"]
+        try:
+            releases = github.releases(repository)
+        except urllib.error.HTTPError as error:
+            if error.code != 404 or github.repository_exists(repository):
+                raise
+            warn(
+                f"{registration['id']}: Release 仓库 {repository} 已不存在（GitHub 返回 404），"
+                "按作者注销处理，已从目录移除"
+            )
+            retired.append(path)
+            continue
+        for release in releases:
             if release.get("draft") or release.get("prerelease"):
                 continue
             published_releases += 1
@@ -558,7 +588,8 @@ def main():
     parser.add_argument("--check", action="store_true", help="validate without writing files")
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
-    catalog = build(root / "registrations", GitHub(os.environ.get("GITHUB_TOKEN")))
+    retired = []
+    catalog = build(root / "registrations", GitHub(os.environ.get("GITHUB_TOKEN")), retired)
     rendered = json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
     if len(rendered.encode("utf-8")) > 1024 * 1024:
         fail("generated index exceeds the client's 1 MB limit")
@@ -571,9 +602,14 @@ def main():
     if args.check:
         print(rendered)
         return
+    for path in retired:
+        path.unlink()
     index_path.write_text(rendered, encoding="utf-8", newline="\n")
     readme_path.write_text(readme, encoding="utf-8", newline="\n")
-    print(f"Updated {len(catalog['plugins'])} plugins")
+    message = f"Updated {len(catalog['plugins'])} plugins"
+    if retired:
+        message += f"; retired {len(retired)}"
+    print(message)
 
 
 if __name__ == "__main__":

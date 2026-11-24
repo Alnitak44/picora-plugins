@@ -47,7 +47,7 @@ jobs:
       - name: Commit generated catalog
         if: github.event_name != 'pull_request'
         run: |
-          git add index.json README.md
+          git add -A index.json README.md registrations
           if git diff --cached --quiet; then exit 0; fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
