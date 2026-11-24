@@ -474,5 +474,65 @@ class CatalogBuilderTests(unittest.TestCase):
             )
 
 
+    def test_catalog_orders_newest_release_first(self):
+        class TwoPluginGitHub:
+            def __init__(self):
+                self.assets = {}
+                self.releases_by_repository = {}
+
+            def add(self, owner, published):
+                plugin_id = f"io.github.{owner}.picora.demo"
+                repository = f"{owner}/picora-plugin-demo"
+                url = (
+                    f"https://github.com/{repository}/releases/download/v1.0.0/"
+                    "demo-1.0.0.picora-plugin.zip"
+                )
+                self.assets[url] = package(
+                    "1.0.0",
+                    metadata_changes={
+                        "id": plugin_id,
+                        "name": plugin_id,
+                        "repository": f"https://github.com/{repository}",
+                    },
+                )
+                self.releases_by_repository[repository] = [
+                    {
+                        "draft": False,
+                        "prerelease": False,
+                        "published_at": published,
+                        "assets": [
+                            {"name": url.rsplit("/", 1)[-1], "browser_download_url": url}
+                        ],
+                    }
+                ]
+                return plugin_id, repository
+
+            def releases(self, repository):
+                return self.releases_by_repository[repository]
+
+            def asset(self, url):
+                return self.assets[url]
+
+        github = TwoPluginGitHub()
+        older_id, older_repository = github.add("aaa", "2026-01-01T00:00:00Z")
+        newer_id, newer_repository = github.add("zzz", "2026-06-01T00:00:00Z")
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as temp:
+            for plugin_id, repository in [
+                (older_id, older_repository),
+                (newer_id, newer_repository),
+            ]:
+                (Path(temp) / f"{plugin_id}.json").write_text(
+                    json.dumps(
+                        {**REGISTRATION, "id": plugin_id, "releaseRepository": repository}
+                    ),
+                    encoding="utf-8",
+                )
+            catalog = build(Path(temp), github)
+        self.assertEqual(
+            [entry["id"] for entry in catalog["plugins"]],
+            [newer_id, older_id],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

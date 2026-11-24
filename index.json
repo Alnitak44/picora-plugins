@@ -2,62 +2,24 @@
   "schemaVersion": 1,
   "plugins": [
     {
-      "id": "io.github.alnitak44.imgloc",
-      "name": "ImgLoc 图床",
-      "description": "ImgLoc 图片上传，自动获取刷新上传凭证。",
-      "author": "Alnitak44",
-      "repository": "https://github.com/Alnitak44/picora-plugin-imgloc",
-      "version": "1.1.1",
-      "runtime": "http-v2",
-      "packageVersion": 1,
-      "minAppVersion": "1.0.1",
-      "mark": "IL",
-      "tags": [],
-      "requiresAuth": false,
-      "example": false,
-      "sha256": "179cb8b3177e3c089d7301621062bf573e7ef06d89d5fbd21cbe78599d06ee1e",
-      "size": 17084,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.1/imgloc-1.1.1.picora-plugin.zip"
-    },
-    {
-      "id": "io.github.alnitak44.picora.easyimages2",
-      "name": "简单图床",
-      "description": "连接 EasyImages2.0 自建简单图床，用 API Token 上传，支持单张图片云端删除。",
-      "author": "Alnitak44 & DeepSeek",
-      "repository": "https://github.com/Alnitak44/picora-plugin-easyimages",
+      "id": "io.github.enddream-zm.picora.beeimg",
+      "name": "蜜蜂图床",
+      "description": "蜜蜂图床上传：默认游客免登录，可选填写访问令牌永久保存。",
+      "author": "ENDDREAM",
+      "repository": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg",
       "version": "1.1.0",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.0.8",
-      "mark": "EI",
+      "minAppVersion": "1.1.0",
+      "mark": "蜂",
       "tags": [
-        "token",
-        "custom-url",
-        "cloud-delete"
+        "token"
       ],
       "requiresAuth": true,
       "example": false,
-      "sha256": "e098562c78638ca653d101761e2388535a79e650b28dae3bfc8d22d6d3dcc8ce",
-      "size": 5728,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-easyimages/releases/download/v1.1.0/easyimages2-1.1.0.picora-plugin.zip"
-    },
-    {
-      "id": "io.github.alnitak44.picora.picui",
-      "name": "PICUI 图床",
-      "description": "支持游客上传，也可使用个人 Token 上传到 PICUI 账户。",
-      "author": "Alnitak44",
-      "repository": "https://github.com/Alnitak44/picora-plugin-picui",
-      "version": "1.0.1",
-      "runtime": "http-v2",
-      "packageVersion": 1,
-      "minAppVersion": "1.0.1",
-      "mark": "PIC",
-      "tags": [],
-      "requiresAuth": false,
-      "example": false,
-      "sha256": "1b1419e5906b058ee7da944a5b1c62a1d7fb8e39ec9e9a72d3e200c98ff7875f",
-      "size": 15073,
-      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-picui/releases/download/v1.0.1/picui-1.0.1.picora-plugin.zip"
+      "sha256": "82925026556579b2b8b11fc37fa24ce8be9afd2e41d8446789c55269dd310fa5",
+      "size": 4088,
+      "downloadUrl": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg/releases/download/1.1.0/beeimg-1.1.0.picora-plugin.zip"
     },
     {
       "id": "io.github.alnitak44.picora.xiadeng",
@@ -80,6 +42,84 @@
       "downloadUrl": "https://github.com/Alnitak44/picora-plugin-xiadeng/releases/download/v1.1.0/xiadeng-1.1.0.picora-plugin.zip"
     },
     {
+      "id": "io.github.alnitak44.picora.picui",
+      "name": "PICUI 图床",
+      "description": "支持游客上传，也可使用个人 Token 上传到 PICUI 账户。",
+      "author": "Alnitak44",
+      "repository": "https://github.com/Alnitak44/picora-plugin-picui",
+      "version": "1.0.1",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.1",
+      "mark": "PIC",
+      "tags": [],
+      "requiresAuth": false,
+      "example": false,
+      "sha256": "1b1419e5906b058ee7da944a5b1c62a1d7fb8e39ec9e9a72d3e200c98ff7875f",
+      "size": 15073,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-picui/releases/download/v1.0.1/picui-1.0.1.picora-plugin.zip"
+    },
+    {
+      "id": "io.github.ruzmarin.picora.superbed-api",
+      "name": "聚合图床Superbed(API)",
+      "description": "使用聚合图床 API Key上传。",
+      "author": "迷迭香",
+      "repository": "https://github.com/ruzmariN/picora-plugins-superbed-api",
+      "version": "1.0.3",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.8",
+      "mark": "SBA",
+      "tags": [
+        "token"
+      ],
+      "requiresAuth": true,
+      "example": false,
+      "sha256": "e09c2b76b0e10ec2a6e06fc474567ca4f0fc0c236660445bc45057ab00bb440e",
+      "size": 16225,
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugins-superbed-api/releases/download/v1.0.3/superbed-api-1.0.3.picora-plugin.zip"
+    },
+    {
+      "id": "io.github.ruzmarin.picora.superbed-account",
+      "name": "聚合图床（账号登录版）",
+      "description": "使用聚合图床邮箱或用户名及密码上传图片，无需 API Key。",
+      "author": "迷迭香、Alnitak44",
+      "repository": "https://github.com/ruzmariN/picora-plugin-superbed-account",
+      "version": "1.0.4",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.8",
+      "mark": "SBA",
+      "tags": [
+        "account"
+      ],
+      "requiresAuth": true,
+      "example": false,
+      "sha256": "5ef52e45fe0002e851b05f3c0b098aa2ad3d0bdf3a4513ce9d1fad1ea184be3f",
+      "size": 16772,
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-superbed-account/releases/download/v1.0.4/superbed-account-1.0.4.picora-plugin.zip"
+    },
+    {
+      "id": "io.github.ruzmarin.picora.imgbb",
+      "name": "ImgBB 图床",
+      "description": "使用 ImgBB API Key 上传图片并获取直链。",
+      "author": "迷迭香",
+      "repository": "https://github.com/ruzmariN/picora-plugin-imgbb",
+      "version": "1.0.1",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.0.8",
+      "mark": "IB",
+      "tags": [
+        "token"
+      ],
+      "requiresAuth": true,
+      "example": false,
+      "sha256": "23c12a4bd0a467c707f2c74be5c4532d9c5642b058d2a6800a727353667c4686",
+      "size": 3170,
+      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-imgbb/releases/download/v1.0.1/imgbb-1.0.1.picora-plugin.zip"
+    },
+    {
       "id": "io.github.alnitak44.telegraph-image",
       "name": "Telegraph-Image",
       "description": "连接 cf-pages/Telegraph-Image 自建图床",
@@ -100,24 +140,22 @@
       "downloadUrl": "https://github.com/Alnitak44/picora-plugin-telegraph-image/releases/download/v1.1.4/telegraph-image-1.1.4.picora-plugin.zip"
     },
     {
-      "id": "io.github.enddream-zm.picora.beeimg",
-      "name": "蜜蜂图床",
-      "description": "蜜蜂图床上传：默认游客免登录，可选填写访问令牌永久保存。",
-      "author": "ENDDREAM",
-      "repository": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg",
-      "version": "1.1.0",
+      "id": "io.github.alnitak44.imgloc",
+      "name": "ImgLoc 图床",
+      "description": "ImgLoc 图片上传，自动获取刷新上传凭证。",
+      "author": "Alnitak44",
+      "repository": "https://github.com/Alnitak44/picora-plugin-imgloc",
+      "version": "1.1.1",
       "runtime": "http-v2",
       "packageVersion": 1,
-      "minAppVersion": "1.1.0",
-      "mark": "蜂",
-      "tags": [
-        "token"
-      ],
-      "requiresAuth": true,
+      "minAppVersion": "1.0.1",
+      "mark": "IL",
+      "tags": [],
+      "requiresAuth": false,
       "example": false,
-      "sha256": "82925026556579b2b8b11fc37fa24ce8be9afd2e41d8446789c55269dd310fa5",
-      "size": 4088,
-      "downloadUrl": "https://github.com/ENDDREAM-ZM/picora-plugin-beeimg/releases/download/1.1.0/beeimg-1.1.0.picora-plugin.zip"
+      "sha256": "179cb8b3177e3c089d7301621062bf573e7ef06d89d5fbd21cbe78599d06ee1e",
+      "size": 17084,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-imgloc/releases/download/v1.1.1/imgloc-1.1.1.picora-plugin.zip"
     },
     {
       "id": "io.github.nmotp.picora.cfimgbed",
@@ -141,64 +179,26 @@
       "downloadUrl": "https://github.com/NMOTP/picora-plugin-cfimgbed/releases/download/v1.1.1/cfimgbed-1.1.1.picora-plugin.zip"
     },
     {
-      "id": "io.github.ruzmarin.picora.imgbb",
-      "name": "ImgBB 图床",
-      "description": "使用 ImgBB API Key 上传图片并获取直链。",
-      "author": "迷迭香",
-      "repository": "https://github.com/ruzmariN/picora-plugin-imgbb",
-      "version": "1.0.1",
+      "id": "io.github.alnitak44.picora.easyimages2",
+      "name": "简单图床",
+      "description": "连接 EasyImages2.0 自建简单图床，用 API Token 上传，支持单张图片云端删除。",
+      "author": "Alnitak44 & DeepSeek",
+      "repository": "https://github.com/Alnitak44/picora-plugin-easyimages",
+      "version": "1.1.0",
       "runtime": "http-v2",
       "packageVersion": 1,
       "minAppVersion": "1.0.8",
-      "mark": "IB",
+      "mark": "EI",
       "tags": [
-        "token"
+        "token",
+        "custom-url",
+        "cloud-delete"
       ],
       "requiresAuth": true,
       "example": false,
-      "sha256": "23c12a4bd0a467c707f2c74be5c4532d9c5642b058d2a6800a727353667c4686",
-      "size": 3170,
-      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-imgbb/releases/download/v1.0.1/imgbb-1.0.1.picora-plugin.zip"
-    },
-    {
-      "id": "io.github.ruzmarin.picora.superbed-account",
-      "name": "聚合图床（账号登录版）",
-      "description": "使用聚合图床邮箱或用户名及密码上传图片，无需 API Key。",
-      "author": "迷迭香、Alnitak44",
-      "repository": "https://github.com/ruzmariN/picora-plugin-superbed-account",
-      "version": "1.0.4",
-      "runtime": "http-v2",
-      "packageVersion": 1,
-      "minAppVersion": "1.0.8",
-      "mark": "SBA",
-      "tags": [
-        "account"
-      ],
-      "requiresAuth": true,
-      "example": false,
-      "sha256": "5ef52e45fe0002e851b05f3c0b098aa2ad3d0bdf3a4513ce9d1fad1ea184be3f",
-      "size": 16772,
-      "downloadUrl": "https://github.com/ruzmariN/picora-plugin-superbed-account/releases/download/v1.0.4/superbed-account-1.0.4.picora-plugin.zip"
-    },
-    {
-      "id": "io.github.ruzmarin.picora.superbed-api",
-      "name": "聚合图床Superbed(API)",
-      "description": "使用聚合图床 API Key上传。",
-      "author": "迷迭香",
-      "repository": "https://github.com/ruzmariN/picora-plugins-superbed-api",
-      "version": "1.0.3",
-      "runtime": "http-v2",
-      "packageVersion": 1,
-      "minAppVersion": "1.0.8",
-      "mark": "SBA",
-      "tags": [
-        "token"
-      ],
-      "requiresAuth": true,
-      "example": false,
-      "sha256": "e09c2b76b0e10ec2a6e06fc474567ca4f0fc0c236660445bc45057ab00bb440e",
-      "size": 16225,
-      "downloadUrl": "https://github.com/ruzmariN/picora-plugins-superbed-api/releases/download/v1.0.3/superbed-api-1.0.3.picora-plugin.zip"
+      "sha256": "e098562c78638ca653d101761e2388535a79e650b28dae3bfc8d22d6d3dcc8ce",
+      "size": 5728,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-easyimages/releases/download/v1.1.0/easyimages2-1.1.0.picora-plugin.zip"
     }
   ]
 }

@@ -452,6 +452,7 @@ def build(registrations, github):
             if release.get("draft") or release.get("prerelease"):
                 continue
             published_releases += 1
+            published_at = release.get("published_at") or release.get("created_at") or ""
             for asset in release.get("assets", []):
                 name = asset.get("name", "")
                 asset_names.append(name)
@@ -473,7 +474,7 @@ def build(registrations, github):
                 if entry is None:
                     continue
                 entry["downloadUrl"] = url
-                candidates.append((entry, data, name, suffix == PACKAGE_SUFFIX))
+                candidates.append((entry, data, name, suffix == PACKAGE_SUFFIX, published_at))
         if not candidates:
             if observed_ids:
                 fail(
@@ -492,7 +493,7 @@ def build(registrations, github):
                 f"现有附件：{preview}。文件名应以 {PACKAGE_SUFFIX} 结尾"
                 + (f"，并以 {registration['assetPrefix']} 开头" if registration.get("assetPrefix") else "")
             )
-        latest, latest_data, latest_name, canonical_name = max(
+        latest, latest_data, latest_name, canonical_name, latest_published = max(
             candidates, key=lambda candidate: (version_key(candidate[0]["version"]), candidate[3])
         )
         if not canonical_name:
@@ -507,9 +508,11 @@ def build(registrations, github):
                 f"{registration['id']}: approvedPermissions 允许任意主机（*）；"
                 "该插件可以改写请求目标，首次收录与权限变更时需人工确认"
             )
-        entries.append(validated)
-    entries.sort(key=lambda entry: entry["id"])
-    return {"schemaVersion": 1, "plugins": entries}
+        entries.append((latest_published, validated))
+    # 最新的 Release 排在最前面；发布时间相同时按 ID 升序，保证每次构建结果稳定。
+    entries.sort(key=lambda item: item[1]["id"])
+    entries.sort(key=lambda item: item[0], reverse=True)
+    return {"schemaVersion": 1, "plugins": [entry for _, entry in entries]}
 
 
 def clip_width(text, limit=22):
