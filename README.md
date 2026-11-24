@@ -7,6 +7,7 @@
 <!-- catalog:start -->
 | 插件 | 作者 | 版本 | 说明 |
 | --- | --- | --- | --- |
+| [聚合图床](https://github.com/Alnitak44/picora-plugin-superbed) | Alnitak44 | 1.0.0 | 聚合图床（Superbed）上传：新建配置时可选 API Key 或账号密码登录两种鉴权方式。 |
 | [蜜蜂图床](https://github.com/ENDDREAM-ZM/picora-plugin-beeimg) | ENDDREAM | 1.1.0 | 蜜蜂图床上传：默认游客免登录，可选填写访问令牌永久保存。 |
 | [虾蹬公益图床](https://github.com/Alnitak44/picora-plugin-xiadeng) | Alnitak44 & DeepSeek | 1.1.0 | 连接 ai01.teleapi.top 虾蹬公益图床，使用 Linux DO 登录后的会话 Cookie 上传。 |
 | [PICUI 图床](https://github.com/Alnitak44/picora-plugin-picui) | Alnitak44 | 1.0.1 | 支持游客上传，也可使用个人 Token 上传到 PICUI 账户。 |
