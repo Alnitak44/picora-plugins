@@ -2,6 +2,28 @@
   "schemaVersion": 1,
   "plugins": [
     {
+      "id": "io.github.alnitak44.picmo",
+      "name": "Picmo 图床",
+      "description": "Picmo 图床（picmo.cn）适配：可选游客上传（图片保留 1 小时）或 API Token 登录上传（长期保存）。",
+      "author": "Alnitak44 & DeepSeek",
+      "repository": "https://github.com/Alnitak44/picora-plugin-picmo",
+      "version": "1.1.0",
+      "runtime": "http-v2",
+      "packageVersion": 1,
+      "minAppVersion": "1.1.0",
+      "mark": "PM",
+      "tags": [
+        "token",
+        "custom-url"
+      ],
+      "requiresAuth": true,
+      "example": false,
+      "sha256": "cbfda1952a2445e91f548801b821888122612b1886b0afaa4f91a9efd05fc1ec",
+      "size": 4750,
+      "downloadUrl": "https://github.com/Alnitak44/picora-plugin-picmo/releases/download/v1.1.0/picmo-1.1.0.picora-plugin.zip",
+      "repositoryId": 1474570505
+    },
+    {
       "id": "io.github.alnitak44.picora.superbed",
       "name": "聚合图床",
       "description": "聚合图床（Superbed）上传：新建配置时可选 API Key 或账号密码登录两种鉴权方式。",
@@ -83,27 +105,6 @@
       "size": 15073,
       "downloadUrl": "https://github.com/Alnitak44/picora-plugin-picui/releases/download/v1.0.1/picui-1.0.1.picora-plugin.zip",
       "repositoryId": 1458607854
-    },
-    {
-      "id": "io.github.ruzmarin.picora.superbed-api",
-      "name": "聚合图床Superbed(API)",
-      "description": "使用聚合图床 API Key上传。",
-      "author": "迷迭香",
-      "repository": "https://github.com/ruzmariN/picora-plugins-superbed-api",
-      "version": "1.0.3",
-      "runtime": "http-v2",
-      "packageVersion": 1,
-      "minAppVersion": "1.0.8",
-      "mark": "SBA",
-      "tags": [
-        "token"
-      ],
-      "requiresAuth": true,
-      "example": false,
-      "sha256": "e09c2b76b0e10ec2a6e06fc474567ca4f0fc0c236660445bc45057ab00bb440e",
-      "size": 16225,
-      "downloadUrl": "https://github.com/ruzmariN/picora-plugins-superbed-api/releases/download/v1.0.3/superbed-api-1.0.3.picora-plugin.zip",
-      "repositoryId": 1415010250
     },
     {
       "id": "io.github.ruzmarin.picora.imgbb",
